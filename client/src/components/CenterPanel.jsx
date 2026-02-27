@@ -28,7 +28,7 @@ export default function CenterPanel({
             overflow: 'hidden',
         }}>
             {/* Score Header */}
-            <div style={{
+            <div className="center-panel-header" style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -38,10 +38,10 @@ export default function CenterPanel({
             }}>
                 {/* Left team score */}
                 <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-light)' }}>
+                    <div className="team-name" style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-light)' }}>
                         {leftTeamName}
                     </div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--blue)' }}>
+                    <div className="score-val" style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--blue)' }}>
                         {leftScore}
                     </div>
                 </div>
@@ -53,7 +53,7 @@ export default function CenterPanel({
                     gap: '6px',
                 }}>
                     <span style={{ fontSize: '1.1rem' }}>⏱</span>
-                    <span className={isLowTime ? 'animate-pulse' : ''} style={{
+                    <span className={`timer-val ${isLowTime ? 'animate-pulse' : ''}`} style={{
                         fontSize: '1.3rem',
                         fontWeight: 800,
                         color: isLowTime ? 'var(--red)' : 'var(--text-dark)',
@@ -65,10 +65,10 @@ export default function CenterPanel({
 
                 {/* Right team score */}
                 <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-light)' }}>
+                    <div className="team-name" style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-light)' }}>
                         {rightTeamName}
                     </div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--red)' }}>
+                    <div className="score-val" style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--red)' }}>
                         {rightScore}
                     </div>
                 </div>

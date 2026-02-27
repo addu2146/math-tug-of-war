@@ -319,3 +319,78 @@ body,
   border-color: var(--red);
   background: var(--red-light);
 }
+
+/* === Mobile Optimisations === */
+
+@keyframes rotate-phone {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    transform: rotate(-90deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+/* Portrait mode on tablets/smartphones restricts gameplay */
+@media screen and (orientation: portrait) and (max-width: 900px) {
+  .game-container {
+    display: none !important;
+  }
+
+  #landscape-prompt {
+    display: flex !important;
+  }
+}
+
+/* Compact rules for small heights (landscape smartphones) */
+@media screen and (max-height: 500px) {
+  .game-header {
+    padding: 4px 16px !important;
+  }
+
+  .game-header-title {
+    font-size: 1rem !important;
+  }
+
+  .player-panel-header {
+    padding: 6px 12px !important;
+  }
+
+  .player-panel-body {
+    padding: 6px 10px !important;
+    gap: 6px !important;
+  }
+
+  .math-problem {
+    font-size: 1.4rem !important;
+    padding: 2px 0 !important;
+  }
+
+  .answer-input {
+    font-size: 1.1rem !important;
+    padding: 6px !important;
+  }
+
+  .numpad-btn {
+    min-height: 40px !important;
+    min-width: 40px !important;
+    font-size: 1.1rem !important;
+  }
+
+  .center-panel-header {
+    padding: 6px 16px !important;
+  }
+
+  .score-val {
+    font-size: 1.2rem !important;
+  }
+
+  .timer-val {
+    font-size: 1.1rem !important;
+  }
+}

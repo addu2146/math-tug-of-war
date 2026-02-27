@@ -78,7 +78,7 @@ export default function PlayerPanel({
             }}
         >
             {/* Colored Header */}
-            <div style={{
+            <div className="player-panel-header" style={{
                 background: headerBg,
                 padding: '10px 16px',
                 display: 'flex',
@@ -105,7 +105,7 @@ export default function PlayerPanel({
             </div>
 
             {/* Problem + Input + Numpad */}
-            <div style={{
+            <div className="player-panel-body" style={{
                 flex: 1,
                 padding: '12px 14px',
                 display: 'flex',
@@ -115,7 +115,7 @@ export default function PlayerPanel({
                 margin: '0',
             }}>
                 {/* Math Problem */}
-                <div className={answerResult === 'incorrect' ? 'animate-shake' : ''} style={{
+                <div className={`math-problem ${answerResult === 'incorrect' ? 'animate-shake' : ''}`} style={{
                     textAlign: 'center',
                     fontSize: '1.8rem',
                     fontWeight: 900,

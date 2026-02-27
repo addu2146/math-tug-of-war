@@ -6,7 +6,7 @@ import React from 'react';
 
 export default function GameHeader() {
     return (
-        <div style={{
+        <div className="game-header" style={{
             background: 'var(--blue)',
             padding: '10px 24px',
             display: 'flex',
@@ -16,7 +16,7 @@ export default function GameHeader() {
             zIndex: 20,
             position: 'relative',
         }}>
-            <h1 style={{
+            <h1 className="game-header-title" style={{
                 color: 'white',
                 fontSize: '1.3rem',
                 fontWeight: 900,
