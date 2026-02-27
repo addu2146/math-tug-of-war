@@ -417,3 +417,13 @@ body,
     padding: 12px !important;
   }
 }
+
+/* === Restore Touch Action for Setup Wizard === */
+.setup-wrapper {
+  touch-action: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.setup-wrapper * {
+  touch-action: auto !important;
+}
