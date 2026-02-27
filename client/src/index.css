@@ -409,7 +409,6 @@ body,
   }
 
   .step-content {
-    min-height: 160px !important;
     margin-top: 12px !important;
   }
 
@@ -419,11 +418,11 @@ body,
 }
 
 /* === Restore Touch Action for Setup Wizard === */
-.setup-wrapper {
-  touch-action: auto !important;
+.step-content {
+  touch-action: pan-y !important;
   -webkit-overflow-scrolling: touch !important;
 }
 
-.setup-wrapper * {
-  touch-action: auto !important;
+.step-content * {
+  touch-action: pan-y !important;
 }

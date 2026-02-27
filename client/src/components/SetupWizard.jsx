@@ -53,15 +53,18 @@ export default function SetupWizard({ onStartGame }) {
             width: '100%',
             height: '100%',
             display: 'flex',
-            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
             padding: '16px',
-            overflowY: 'auto',
+            touchAction: 'none',
         }}>
             <div className="card wizard-card animate-pop-in" style={{
                 width: '100%',
                 maxWidth: '600px',
+                maxHeight: '100%',
+                display: 'flex',
+                flexDirection: 'column',
                 padding: '36px',
-                margin: 'auto',
             }}>
                 {/* Title */}
                 <h1 className="setup-title" style={{
@@ -80,7 +83,13 @@ export default function SetupWizard({ onStartGame }) {
                 <StepIndicator currentStep={step} />
 
                 {/* Step Content */}
-                <div className="step-content" style={{ marginTop: '24px', minHeight: '220px' }}>
+                <div className="step-content" style={{
+                    marginTop: '24px',
+                    flex: 1,
+                    overflowY: 'auto',
+                    minHeight: 0,
+                    paddingRight: '8px'
+                }}>
                     {step === 1 && (
                         <div className="animate-slide-up">
                             <h2 style={{ textAlign: 'center', fontSize: '1.2rem', fontWeight: 700, marginBottom: '8px' }}>
