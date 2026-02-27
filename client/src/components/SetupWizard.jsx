@@ -94,7 +94,7 @@ export default function SetupWizard({ onStartGame }) {
                                     <button
                                         key={op.key}
                                         className={`wizard-btn ${selectedOps.includes(op.key) ? 'wizard-btn-selected' : ''}`}
-                                        onPointerDown={(e) => { e.preventDefault(); toggleOp(op.key); }}
+                                        onPointerDown={(e) => { toggleOp(op.key); }}
                                         style={{ width: '100%' }}
                                     >
                                         <span style={{
@@ -126,7 +126,7 @@ export default function SetupWizard({ onStartGame }) {
                                     <button
                                         key={d.key}
                                         className={`wizard-btn ${difficulty === d.key ? 'wizard-btn-selected' : ''}`}
-                                        onPointerDown={(e) => { e.preventDefault(); setDifficulty(d.key); }}
+                                        onPointerDown={(e) => { setDifficulty(d.key); }}
                                         style={{
                                             flex: 1, flexDirection: 'column', padding: '16px 8px',
                                             textAlign: 'center', justifyContent: 'center',
@@ -199,7 +199,7 @@ export default function SetupWizard({ onStartGame }) {
                     {step > 1 && (
                         <button
                             className="wizard-btn"
-                            onPointerDown={(e) => { e.preventDefault(); setStep((s) => s - 1); }}
+                            onPointerDown={(e) => { setStep((s) => s - 1); }}
                             style={{ padding: '12px 28px' }}
                         >
                             ← BACK
@@ -208,7 +208,7 @@ export default function SetupWizard({ onStartGame }) {
                     {step < 3 ? (
                         <button
                             className="wizard-btn wizard-btn-primary"
-                            onPointerDown={(e) => { e.preventDefault(); setStep((s) => s + 1); }}
+                            onPointerDown={(e) => { setStep((s) => s + 1); }}
                             style={{ flex: 1, maxWidth: '300px' }}
                         >
                             NEXT →
@@ -216,7 +216,7 @@ export default function SetupWizard({ onStartGame }) {
                     ) : (
                         <button
                             className="wizard-btn wizard-btn-primary"
-                            onPointerDown={(e) => { e.preventDefault(); handleStart(); }}
+                            onPointerDown={(e) => { handleStart(); }}
                             style={{ flex: 1, maxWidth: '300px' }}
                         >
                             ▶ START GAME
