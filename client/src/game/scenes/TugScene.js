@@ -76,7 +76,7 @@ export class TugScene extends Scene {
 
     /* ── Helpers ───────────────────────────────────────────────────── */
 
-    getCharScale(h) { return Math.min(0.38, h / 900); }
+    getCharScale(h) { return Math.min(0.38, (h / 900) * 0.7); } // Much smaller base scale on mobile heights
     getRopeY(h) { return h * 0.55; }
     getRopeHalfLen(w) { return w * 0.28; }
 
