@@ -24,7 +24,7 @@ export default function GameHeader() {
                 textTransform: 'uppercase',
                 margin: 0,
             }}>
-                TUG OF WAR: MATHEMATICS
+                TUG OF WAR by JUNIOR RAMANUJAN CLUB
             </h1>
         </div>
     );
