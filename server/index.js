@@ -90,7 +90,7 @@ wss.on('connection', (ws) => {
 });
 
 // --- SPA catch-all: serve index.html for any non-API route ---
-app.get('*', (req, res) => {
+app.get('*path', (req, res) => {
     res.sendFile(path.join(clientDist, 'index.html'));
 });
 
