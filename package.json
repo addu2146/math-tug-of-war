@@ -1,0 +1,13 @@
+{
+  "name": "math-tug-of-war",
+  "version": "1.0.0",
+  "description": "Math Tug-of-War — Same-screen multiplayer math game",
+  "private": true,
+  "scripts": {
+    "install:all": "cd client && npm install && cd ../server && npm install",
+    "build": "cd client && npm run build",
+    "start": "cd server && node index.js",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev"
+  }
+}

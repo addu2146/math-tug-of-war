@@ -1,0 +1,176 @@
+/**
+ * GameLayout — Root orchestrator with music integration.
+ * Shows setup wizard → countdown → 3-panel game → victory.
+ *
+ * Music starts on game start, plays SFX on correct/incorrect answers.
+ * Same-screen multi-touch: both teams interact on the same device.
+ */
+
+import React, { useRef, useState, useCallback, useEffect } from 'react';
+import GameHeader from './GameHeader.jsx';
+import SetupWizard from './SetupWizard.jsx';
+import PlayerPanel from './PlayerPanel.jsx';
+import CenterPanel from './CenterPanel.jsx';
+import Countdown from './Countdown.jsx';
+import VictoryModal from './VictoryModal.jsx';
+import { useWebSocket } from '../hooks/useWebSocket.js';
+import { useGameState } from '../hooks/useGameState.js';
+import { gameMusic } from '../audio/GameMusic.js';
+
+export default function GameLayout() {
+    const phaserRef = useRef(null);
+    const { state, handleServerMessage, clearAnswerResult, resetState } = useGameState();
+    const { sendMessage, isConnected } = useWebSocket(handleServerMessage);
+    const [showCountdown, setShowCountdown] = useState(false);
+    const [gameConfig, setGameConfig] = useState(null);
+
+    // Handle setup wizard completion — start countdown
+    const handleStartGame = useCallback((config) => {
+        // Initialize audio on user gesture (required by browsers)
+        gameMusic.init();
+        setGameConfig(config);
+        setShowCountdown(true);
+    }, []);
+
+    // After countdown, start the game via WebSocket and start music
+    const handleCountdownComplete = useCallback(() => {
+        setShowCountdown(false);
+        sendMessage('SETUP_GAME', { payload: gameConfig });
+        // Start urgent background music
+        gameMusic.start();
+    }, [sendMessage, gameConfig]);
+
+    // Handle answer submission from a player panel
+    const handleSubmitAnswer = useCallback((side, answer) => {
+        sendMessage('ANSWER_SUBMITTED', { side, answer });
+    }, [sendMessage]);
+
+    // Play SFX when answer results come in
+    useEffect(() => {
+        if (state.answerResults.left === 'correct' || state.answerResults.right === 'correct') {
+            gameMusic.playCorrect();
+        }
+        if (state.answerResults.left === 'incorrect' || state.answerResults.right === 'incorrect') {
+            gameMusic.playIncorrect();
+        }
+    }, [state.answerResults.left, state.answerResults.right]);
+
+    // Stop music on game over
+    useEffect(() => {
+        if (state.phase === 'gameOver') {
+            gameMusic.stop();
+        }
+    }, [state.phase]);
+
+    // Handle play again
+    const handlePlayAgain = useCallback(() => {
+        resetState();
+        setGameConfig(null);
+    }, [resetState]);
+
+    // Cleanup music on unmount
+    useEffect(() => {
+        return () => { gameMusic.destroy(); };
+    }, []);
+
+    // Show setup wizard
+    if (state.phase === 'setup' && !showCountdown) {
+        return (
+            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <GameHeader />
+                {!isConnected && (
+                    <div style={{
+                        background: 'var(--red)',
+                        color: 'white',
+                        textAlign: 'center',
+                        padding: '8px',
+                        fontWeight: 700,
+                        fontSize: '0.9rem',
+                    }}>
+                        ⚠️ Connecting to server...
+                    </div>
+                )}
+                <SetupWizard onStartGame={handleStartGame} />
+            </div>
+        );
+    }
+
+    // Show countdown
+    if (showCountdown) {
+        return (
+            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <GameHeader />
+                <Countdown onComplete={handleCountdownComplete} />
+            </div>
+        );
+    }
+
+    // Main gameplay view
+    return (
+        <div style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+        }}>
+            <GameHeader />
+
+            {/* 3-Panel Game Area */}
+            <div style={{
+                flex: 1,
+                display: 'flex',
+                gap: '12px',
+                padding: '12px',
+                overflow: 'hidden',
+                alignItems: 'stretch',
+            }}>
+                {/* Left Player Panel (Blue) */}
+                <PlayerPanel
+                    side="left"
+                    problem={state.problems.left}
+                    score={state.players.left.score}
+                    streak={state.players.left.streak}
+                    teamName={state.teamNames.left}
+                    answerResult={state.answerResults.left}
+                    onSubmitAnswer={handleSubmitAnswer}
+                    onClearResult={() => clearAnswerResult('left')}
+                    disabled={state.phase !== 'playing'}
+                />
+
+                {/* Center Panel (Scores + Timer + Phaser) */}
+                <CenterPanel
+                    leftScore={state.players.left.score}
+                    rightScore={state.players.right.score}
+                    leftTeamName={state.teamNames.left}
+                    rightTeamName={state.teamNames.right}
+                    timeRemaining={state.timeRemaining}
+                    phaserRef={phaserRef}
+                />
+
+                {/* Right Player Panel (Red) */}
+                <PlayerPanel
+                    side="right"
+                    problem={state.problems.right}
+                    score={state.players.right.score}
+                    streak={state.players.right.streak}
+                    teamName={state.teamNames.right}
+                    answerResult={state.answerResults.right}
+                    onSubmitAnswer={handleSubmitAnswer}
+                    onClearResult={() => clearAnswerResult('right')}
+                    disabled={state.phase !== 'playing'}
+                />
+            </div>
+
+            {/* Victory Modal */}
+            {state.phase === 'gameOver' && (
+                <VictoryModal
+                    winner={state.winner}
+                    players={state.players}
+                    teamNames={state.teamNames}
+                    onPlayAgain={handlePlayAgain}
+                />
+            )}
+        </div>
+    );
+}
