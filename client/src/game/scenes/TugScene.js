@@ -229,6 +229,13 @@ export class TugScene extends Scene {
         this.ropeGfx.clear();
         if (nodes.length < 2) return;
 
+        const h = this.scale.height;
+        const sF = Math.max(0.3, h / 900); // Scale factor based on 900px height baseline
+        const ROPE_WIDTH_S = ROPE_WIDTH * sF;
+        const SHADOW_WIDTH_S = SHADOW_WIDTH * sF;
+        const STRAND_OFFSET_S = STRAND_OFFSET * sF;
+        const BRAID_PERIOD_S = BRAID_PERIOD * sF;
+
         // 1. Catmull-Rom spline → smooth curve
         const spline = this.catmullRomSpline(nodes, SPLINE_SAMPLES);
         if (spline.length < 4) return;
@@ -257,9 +264,9 @@ export class TugScene extends Scene {
                 accumDist += Math.sqrt(dx * dx + dy * dy);
             }
             // Sinusoidal braid cross-over
-            const braidPhase = Math.sin((accumDist / BRAID_PERIOD) * Math.PI * 2);
-            const offA = STRAND_OFFSET * braidPhase;
-            const offB = -STRAND_OFFSET * braidPhase;
+            const braidPhase = Math.sin((accumDist / BRAID_PERIOD_S) * Math.PI * 2);
+            const offA = STRAND_OFFSET_S * braidPhase;
+            const offB = -STRAND_OFFSET_S * braidPhase;
 
             strandA.push({
                 x: spline[i].x + normals[i].x * offA,
@@ -272,7 +279,7 @@ export class TugScene extends Scene {
         }
 
         // ── Layer 1: Wide shadow ────────────────────────────────────
-        this.ropeGfx.lineStyle(SHADOW_WIDTH, ROPE_SHADOW, 0.12);
+        this.ropeGfx.lineStyle(SHADOW_WIDTH_S, ROPE_SHADOW, 0.12);
         this.ropeGfx.beginPath();
         this.ropeGfx.moveTo(spline[0].x, spline[0].y + 4);
         for (let i = 1; i < spline.length; i++) {
@@ -281,7 +288,7 @@ export class TugScene extends Scene {
         this.ropeGfx.strokePath();
 
         // ── Layer 2: Dark base body ─────────────────────────────────
-        this.ropeGfx.lineStyle(ROPE_WIDTH + 4, ROPE_DARK, 0.85);
+        this.ropeGfx.lineStyle(ROPE_WIDTH_S + (4 * sF), ROPE_DARK, 0.85);
         this.ropeGfx.beginPath();
         this.ropeGfx.moveTo(spline[0].x, spline[0].y);
         for (let i = 1; i < spline.length; i++) {
@@ -290,7 +297,7 @@ export class TugScene extends Scene {
         this.ropeGfx.strokePath();
 
         // ── Layer 3: Strand A (bottom/dark strand) ──────────────────
-        this.ropeGfx.lineStyle(ROPE_WIDTH, ROPE_BASE, 1);
+        this.ropeGfx.lineStyle(ROPE_WIDTH_S, ROPE_BASE, 1);
         this.ropeGfx.beginPath();
         this.ropeGfx.moveTo(strandA[0].x, strandA[0].y);
         for (let i = 1; i < strandA.length; i++) {
@@ -299,7 +306,7 @@ export class TugScene extends Scene {
         this.ropeGfx.strokePath();
 
         // ── Layer 4: Strand B (top/light strand) ────────────────────
-        this.ropeGfx.lineStyle(ROPE_WIDTH, ROPE_LIGHT, 0.8);
+        this.ropeGfx.lineStyle(ROPE_WIDTH_S, ROPE_LIGHT, 0.8);
         this.ropeGfx.beginPath();
         this.ropeGfx.moveTo(strandB[0].x, strandB[0].y);
         for (let i = 1; i < strandB.length; i++) {
@@ -308,43 +315,46 @@ export class TugScene extends Scene {
         this.ropeGfx.strokePath();
 
         // ── Layer 5: Highlight edge (top) ───────────────────────────
-        this.ropeGfx.lineStyle(1.5, 0xF5E6B0, 0.35);
+        this.ropeGfx.lineStyle(1.5 * sF, 0xF5E6B0, 0.35);
         this.ropeGfx.beginPath();
-        this.ropeGfx.moveTo(spline[0].x + normals[0].x * -3, spline[0].y + normals[0].y * -3);
+        const highlightOff = 3 * sF;
+        this.ropeGfx.moveTo(spline[0].x + normals[0].x * -highlightOff, spline[0].y + normals[0].y * -highlightOff);
         for (let i = 1; i < spline.length; i++) {
             this.ropeGfx.lineTo(
-                spline[i].x + normals[i].x * -3,
-                spline[i].y + normals[i].y * -3,
+                spline[i].x + normals[i].x * -highlightOff,
+                spline[i].y + normals[i].y * -highlightOff,
             );
         }
         this.ropeGfx.strokePath();
 
         // ── Layer 6: Knot wraps ─────────────────────────────────────
         accumDist = 0;
+        const KNOT_SPACING_S = KNOT_SPACING * sF;
         for (let i = 1; i < spline.length; i++) {
             const dx = spline[i].x - spline[i - 1].x;
             const dy = spline[i].y - spline[i - 1].y;
             accumDist += Math.sqrt(dx * dx + dy * dy);
-            if (accumDist >= KNOT_SPACING) {
+            if (accumDist >= KNOT_SPACING_S) {
                 accumDist = 0;
-                this.drawKnot(spline[i], normals[i], tangents[i]);
+                this.drawKnot(spline[i], normals[i], tangents[i], sF, ROPE_WIDTH_S);
             }
         }
 
         // ── Flag at center node (node 10 of 21) ────────────────────
         const centerIdx = Math.floor(spline.length / 2);
         const flagPt = spline[centerIdx];
-        this.drawFlag(flagPt.x, flagPt.y);
+        this.drawFlag(flagPt.x, flagPt.y, sF);
     }
 
     /* ── Knot wrap decoration ────────────────────────────────────── */
-    drawKnot(pt, normal, tangent) {
-        const r = ROPE_WIDTH + 3;
+    drawKnot(pt, normal, tangent, sF, ropeWidthS) {
+        const r = ropeWidthS + (3 * sF);
         // Short diagonal wraps
-        this.ropeGfx.lineStyle(2.5, ROPE_DARK, 0.55);
+        this.ropeGfx.lineStyle(2.5 * sF, ROPE_DARK, 0.55);
+        const wrapOff = 3 * sF;
         for (let j = -1; j <= 1; j++) {
-            const cx = pt.x + tangent.x * j * 3;
-            const cy = pt.y + tangent.y * j * 3;
+            const cx = pt.x + tangent.x * j * wrapOff;
+            const cy = pt.y + tangent.y * j * wrapOff;
             this.ropeGfx.lineBetween(
                 cx + normal.x * r, cy + normal.y * r,
                 cx - normal.x * r, cy - normal.y * r,
@@ -352,27 +362,28 @@ export class TugScene extends Scene {
         }
         // Highlight dot at center
         this.ropeGfx.fillStyle(ROPE_LIGHT, 0.5);
-        this.ropeGfx.fillCircle(pt.x, pt.y, 2);
+        this.ropeGfx.fillCircle(pt.x, pt.y, 2 * sF);
     }
 
     /* ── Flag rendering ──────────────────────────────────────────── */
-    drawFlag(cx, cy) {
+    drawFlag(cx, cy, sF) {
         // Pole
-        this.ropeGfx.lineStyle(3, 0x555555, 1);
-        this.ropeGfx.lineBetween(cx, cy, cx, cy - 45);
+        this.ropeGfx.lineStyle(3 * sF, 0x555555, 1);
+        const poleH = 45 * sF;
+        this.ropeGfx.lineBetween(cx, cy, cx, cy - poleH);
         // Flag body
         this.ropeGfx.fillStyle(FLAG_RED, 1);
         this.ropeGfx.fillTriangle(
-            cx, cy - 45,
-            cx + 22, cy - 34,
-            cx, cy - 23,
+            cx, cy - poleH,
+            cx + (22 * sF), cy - (34 * sF),
+            cx, cy - (23 * sF),
         );
         // Highlight
         this.ropeGfx.fillStyle(0xFF5252, 0.5);
         this.ropeGfx.fillTriangle(
-            cx + 2, cy - 43,
-            cx + 18, cy - 35,
-            cx + 2, cy - 27,
+            cx + (2 * sF), cy - (43 * sF),
+            cx + (18 * sF), cy - (35 * sF),
+            cx + (2 * sF), cy - (27 * sF),
         );
     }
 
