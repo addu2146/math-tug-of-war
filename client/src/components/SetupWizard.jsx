@@ -49,21 +49,22 @@ export default function SetupWizard({ onStartGame }) {
     }, [selectedOps, difficulty, teamNames, onStartGame]);
 
     return (
-        <div style={{
+        <div className="setup-wrapper" style={{
             width: '100%',
             height: '100%',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '24px',
+            flexDirection: 'column',
+            padding: '16px',
+            overflowY: 'auto',
         }}>
-            <div className="card animate-pop-in" style={{
+            <div className="card wizard-card animate-pop-in" style={{
                 width: '100%',
                 maxWidth: '600px',
                 padding: '36px',
+                margin: 'auto',
             }}>
                 {/* Title */}
-                <h1 style={{
+                <h1 className="setup-title" style={{
                     textAlign: 'center',
                     fontSize: '1.8rem',
                     fontWeight: 900,
@@ -79,7 +80,7 @@ export default function SetupWizard({ onStartGame }) {
                 <StepIndicator currentStep={step} />
 
                 {/* Step Content */}
-                <div style={{ marginTop: '24px', minHeight: '220px' }}>
+                <div className="step-content" style={{ marginTop: '24px', minHeight: '220px' }}>
                     {step === 1 && (
                         <div className="animate-slide-up">
                             <h2 style={{ textAlign: 'center', fontSize: '1.2rem', fontWeight: 700, marginBottom: '8px' }}>
@@ -147,7 +148,7 @@ export default function SetupWizard({ onStartGame }) {
                             </h2>
                             <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                                 {/* Team 1 Blue */}
-                                <div style={{
+                                <div className="team-input-box" style={{
                                     flex: 1, border: '2px solid var(--blue)', borderRadius: '12px',
                                     padding: '20px', textAlign: 'center',
                                 }}>
@@ -168,7 +169,7 @@ export default function SetupWizard({ onStartGame }) {
                                 <span style={{ fontWeight: 900, color: 'var(--blue)', fontSize: '1.5rem' }}>VS</span>
 
                                 {/* Team 2 Red */}
-                                <div style={{
+                                <div className="team-input-box" style={{
                                     flex: 1, border: '2px solid var(--red)', borderRadius: '12px',
                                     padding: '20px', textAlign: 'center',
                                 }}>
