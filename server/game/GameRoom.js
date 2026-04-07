@@ -90,6 +90,15 @@ export class GameRoom {
         };
     }
 
+    handleRageQuit(side) {
+        if (!this.gameActive) return;
+        
+        // The *other* team wins immediately
+        const winner = side === 'left' ? 'right' : 'left';
+        
+        this.endGame(winner, 'surrender');
+    }
+
     handleAnswer(side, answer) {
         if (!this.gameActive) return;
         const player = this.players[side];

@@ -17,7 +17,7 @@ import { useWebSocket } from '../hooks/useWebSocket.js';
 import { useGameState } from '../hooks/useGameState.js';
 import { gameMusic } from '../audio/GameMusic.js';
 
-export default function GameLayout() {
+export default function GameLayout({ onBackToMenu }) {
     const phaserRef = useRef(null);
     const { state, handleServerMessage, clearAnswerResult, resetState } = useGameState();
     const { sendMessage, isConnected } = useWebSocket(handleServerMessage);
@@ -68,6 +68,19 @@ export default function GameLayout() {
         setGameConfig(null);
     }, [resetState]);
 
+    // Handle team-specific rage quit (forfeits the match)
+    const handleTeamRageQuit = useCallback((side) => {
+        sendMessage('RAGE_QUIT', { side });
+    }, [sendMessage]);
+
+    // Handle full exit to menu
+    const handleExitToMenu = useCallback(() => {
+        gameMusic.stop();
+        resetState();
+        setGameConfig(null);
+        if (onBackToMenu) onBackToMenu();
+    }, [resetState, onBackToMenu]);
+
     // Cleanup music on unmount
     useEffect(() => {
         return () => { gameMusic.destroy(); };
@@ -77,17 +90,21 @@ export default function GameLayout() {
     if (state.phase === 'setup' && !showCountdown) {
         return (
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <GameHeader />
+                <GameHeader onBack={onBackToMenu} />
                 {!isConnected && (
                     <div style={{
                         background: 'var(--red)',
                         color: 'white',
-                        textAlign: 'center',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
                         padding: '8px',
                         fontWeight: 700,
                         fontSize: '0.9rem',
                     }}>
-                        ⚠️ Connecting to server...
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Warning"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        Connecting to server...
                     </div>
                 )}
                 <SetupWizard onStartGame={handleStartGame} />
@@ -99,7 +116,7 @@ export default function GameLayout() {
     if (showCountdown) {
         return (
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <GameHeader />
+                <GameHeader onBack={handleExitToMenu} />
                 <Countdown onComplete={handleCountdownComplete} />
             </div>
         );
@@ -114,7 +131,7 @@ export default function GameLayout() {
             flexDirection: 'column',
             overflow: 'hidden',
         }}>
-            <GameHeader />
+            <GameHeader onBack={handleExitToMenu} />
 
             {/* 3-Panel Game Area */}
             <div style={{
@@ -124,6 +141,7 @@ export default function GameLayout() {
                 padding: '12px',
                 overflow: 'hidden',
                 alignItems: 'stretch',
+                minHeight: 0,
             }}>
                 {/* Left Player Panel (Blue) */}
                 <PlayerPanel
@@ -135,6 +153,7 @@ export default function GameLayout() {
                     answerResult={state.answerResults.left}
                     onSubmitAnswer={handleSubmitAnswer}
                     onClearResult={() => clearAnswerResult('left')}
+                    onRageQuit={handleTeamRageQuit}
                     disabled={state.phase !== 'playing'}
                 />
 
@@ -158,6 +177,7 @@ export default function GameLayout() {
                     answerResult={state.answerResults.right}
                     onSubmitAnswer={handleSubmitAnswer}
                     onClearResult={() => clearAnswerResult('right')}
+                    onRageQuit={handleTeamRageQuit}
                     disabled={state.phase !== 'playing'}
                 />
             </div>

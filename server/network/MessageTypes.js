@@ -7,6 +7,7 @@
 export const CLIENT_MESSAGES = {
     ANSWER_SUBMITTED: 'ANSWER_SUBMITTED',
     PLAYER_READY: 'PLAYER_READY',
+    RAGE_QUIT: 'RAGE_QUIT',
 };
 
 // Server → Client (authoritative state broadcasts)

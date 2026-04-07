@@ -30,19 +30,25 @@ export default function Numpad({ onKeyPress, onClear, onSubmit, disabled }) {
         <div style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr 1fr',
-            gap: '8px',
+            gridTemplateRows: 'repeat(4, 1fr)',
+            gap: 'min(8px, 1vh)',
+            flex: 1,
+            minHeight: 0,
             touchAction: 'none',
         }}>
             {KEYS.flat().map((key) => {
-                let className = 'numpad-btn';
+                let className = 'btn-game ';
                 let content = key;
 
                 if (key === 'clear') {
-                    className += ' numpad-btn-clear';
+                    className += 'btn-red';
                     content = '✕';
                 } else if (key === 'submit') {
-                    className += ' numpad-btn-submit';
+                    className += 'btn-green';
                     content = '✓';
+                } else {
+                    // Default number keys
+                    className += 'btn-ghost-dark';
                 }
 
                 return (
@@ -51,7 +57,7 @@ export default function Numpad({ onKeyPress, onClear, onSubmit, disabled }) {
                         className={className}
                         onPointerDown={(e) => handlePointerDown(e, key)}
                         disabled={disabled}
-                        style={{ opacity: disabled ? 0.5 : 1 }}
+                        style={{ height: '100%', minHeight: 0, padding: 0, margin: 0, fontSize: 'clamp(1rem, 3vh, 1.5rem)', minWidth: 0 }}
                         aria-label={key === 'clear' ? 'Clear' : key === 'submit' ? 'Submit' : `Number ${key}`}
                     >
                         {content}

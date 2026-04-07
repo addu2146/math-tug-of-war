@@ -20,6 +20,7 @@ export default function PlayerPanel({
     answerResult,
     onSubmitAnswer,
     onClearResult,
+    onRageQuit,
     disabled,
 }) {
     const [inputValue, setInputValue] = useState('');
@@ -75,6 +76,7 @@ export default function PlayerPanel({
                 background: panelBg,
                 touchAction: 'none',
                 maxWidth: '320px',
+                minHeight: 0,
             }}
         >
             {/* Colored Header */}
@@ -107,20 +109,21 @@ export default function PlayerPanel({
             {/* Problem + Input + Numpad */}
             <div className="player-panel-body" style={{
                 flex: 1,
-                padding: '12px 14px',
+                padding: 'min(12px, 1.5vh) min(14px, 1.5vw)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '10px',
+                gap: 'min(10px, 1.2vh)',
                 background: 'white',
                 margin: '0',
+                minHeight: 0,
             }}>
                 {/* Math Problem */}
                 <div className={`math-problem ${answerResult === 'incorrect' ? 'animate-shake' : ''}`} style={{
                     textAlign: 'center',
-                    fontSize: '1.8rem',
+                    fontSize: 'clamp(1.4rem, 4vh, 1.8rem)',
                     fontWeight: 900,
                     color: problemColor,
-                    padding: '6px 0',
+                    padding: 'min(6px, 1vh) 0',
                     lineHeight: 1.2,
                 }}>
                     {problem ? `${problem.expression} = ?` : '...'}
@@ -128,8 +131,12 @@ export default function PlayerPanel({
 
                 {/* Answer Input Display */}
                 <div className={inputClass} style={{
-                    fontSize: '1.3rem',
+                    fontSize: 'clamp(1.1rem, 3vh, 1.3rem)',
                     transition: 'background 0.3s, border-color 0.3s',
+                    minHeight: 'min(40px, 5vh)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                 }}>
                     {answerResult === 'correct' ? '✓' : (inputValue || '0')}
                 </div>
@@ -149,10 +156,42 @@ export default function PlayerPanel({
                         fontSize: '0.85rem',
                         fontWeight: 700,
                         color: 'var(--gold)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px'
                     }}>
-                        🔥 {streak} streak!
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-label="Streak"><path d="M12 2c1.92 4.4 2.82 8.35 1.5 12h-3c-1.32-3.65-.42-7.6 1.5-12Z"/><path d="M12 22a8 8 0 1 0-8-8c0 3.3 2.1 6.1 5 7.4"/></svg>
+                        {streak} streak!
                     </div>
                 )}
+
+                {/* Team Rage Quit / Forfeit Button */}
+                <button
+                    onPointerDown={() => { if(onRageQuit && !disabled) onRageQuit(side); }}
+                    className="btn-game animate-pulse"
+                    disabled={disabled}
+                    style={{
+                        marginTop: 'auto',
+                        background: 'transparent',
+                        color: 'var(--red)',
+                        border: '2px solid var(--red)',
+                        padding: '8px',
+                        borderRadius: '8px',
+                        fontWeight: 800,
+                        fontSize: '0.8rem',
+                        textTransform: 'uppercase',
+                        display: disabled ? 'none' : 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px',
+                        transition: 'all 0.2s',
+                        boxShadow: 'none'
+                    }}
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Forfeit"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    Rage Quit
+                </button>
             </div>
         </div>
     );

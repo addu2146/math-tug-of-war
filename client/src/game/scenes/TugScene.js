@@ -60,11 +60,11 @@ export class TugScene extends Scene {
 
         this.blueTeam = this.add.image(0, ropeY, 'blue_team');
         this.blueTeam.setScale(charScale);
-        this.blueTeam.setOrigin(0.78, 0.55);
+        this.blueTeam.setOrigin(0.78, 0.40);
 
         this.redTeam = this.add.image(0, ropeY, 'red_team');
         this.redTeam.setScale(charScale);
-        this.redTeam.setOrigin(0.22, 0.55);
+        this.redTeam.setOrigin(0.22, 0.40);
 
         this.drawBackground(width, height);
 

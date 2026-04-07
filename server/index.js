@@ -61,6 +61,13 @@ wss.on('connection', (ws) => {
                     break;
                 }
 
+                case 'RAGE_QUIT': {
+                    if (room) {
+                        room.handleRageQuit(msg.side);
+                    }
+                    break;
+                }
+
                 case 'PLAY_AGAIN': {
                     if (room) {
                         room.resetAndRestart(msg.payload || {});
