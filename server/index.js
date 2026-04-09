@@ -101,11 +101,14 @@ app.get('*path', (req, res) => {
     res.sendFile(path.join(clientDist, 'index.html'));
 });
 
-httpServer.listen(PORT, () => {
+const HOST = process.env.HOST || '0.0.0.0';
+
+httpServer.listen(PORT, HOST, () => {
     console.log(`
   ╔══════════════════════════════════════════╗
   ║   🎮 Math Tug-of-War Server             ║
-  ║   PORT: ${PORT}                              ║
+  ║   HOST: ${HOST.padEnd(5, ' ')}                             ║
+  ║   PORT: ${PORT.toString().padEnd(5, ' ')}                            ║
   ║   Mode: Same-Screen Multi-Touch         ║
   ╚══════════════════════════════════════════╝
   `);
