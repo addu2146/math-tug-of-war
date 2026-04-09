@@ -158,6 +158,7 @@ export class TugScene extends Scene {
         const cPrefixCap = isRed ? 'Red' : 'Blue';
         
         const shadow = this.add.ellipse(-35, 125, 90, 20, 0x000000, 0.4);
+        shadow.setName('shadow');
 
         // Origins adjusted so rotation happens at joints
         const backArm = this.add.image(-20, -10, cPrefix + 'Arm_long').setScale(scale).setTint(0xcccccc).setOrigin(0.5, 0.2);
@@ -169,8 +170,9 @@ export class TugScene extends Scene {
 
         const backLeg = this.add.image(-20, 40, 'pants' + cPrefixCap + '_long').setScale(scale).setTint(0xcccccc).setOrigin(0.5, 0.1);
         backLeg.setName('backLeg');
-        const backShoe = this.add.image(-25, 110, cPrefix + 'Shoe1').setScale(scale * 0.8).setTint(0xcccccc);
-        backShoe.setFlipX(true); // Flips horizontally so soles stay planted correctly
+        const backShoe = this.add.image(-25, 110, cPrefix + 'Shoe1')
+            .setScale(scale * 0.8)
+            .setTint(0xcccccc);
         backShoe.setName('backShoe');
         
         const torso = this.add.image(-40, 0, cPrefix + 'Shirt1').setScale(scale);
@@ -180,8 +182,8 @@ export class TugScene extends Scene {
         
         const frontLeg = this.add.image(-40, 40, 'pants' + cPrefixCap + '_long').setScale(scale).setOrigin(0.5, 0.1);
         frontLeg.setName('frontLeg');
-        const frontShoe = this.add.image(-45, 110, cPrefix + 'Shoe1').setScale(scale * 0.8);
-        frontShoe.setFlipX(true); // Flips horizontally so it faces properly and heels aren't broken
+        const frontShoe = this.add.image(-45, 110, cPrefix + 'Shoe1')
+            .setScale(scale * 0.8);
         frontShoe.setName('frontShoe');
         
         const frontArm = this.add.image(-25, -15, cPrefix + 'Arm_long').setScale(scale).setOrigin(0.5, 0.2);
@@ -305,6 +307,10 @@ export class TugScene extends Scene {
             const frontHand = member.getByName('frontHand');
             const backHand = member.getByName('backHand');
 
+            const frontShoe = member.getByName('frontShoe');
+            const backShoe = member.getByName('backShoe');
+            const shadow = member.getByName('shadow');
+
             // Strainy pulling arm motion only active when pullAmt > 0
             if (frontArm) frontArm.rotation = (Math.PI / 8) + (Math.sin(time) * 0.2 * pullAmt);
             if (backArm) backArm.rotation = (Math.PI / 6) + (Math.cos(time) * 0.2 * pullAmt);
@@ -312,6 +318,11 @@ export class TugScene extends Scene {
             // Legs planting and pushing only when pulling
             if (frontLeg) frontLeg.rotation = (Math.sin(time + 1) * 0.15) * pullAmt;
             if (backLeg) backLeg.rotation = -0.1 + (Math.cos(time + 1) * 0.15) * pullAmt;
+
+            // Counteract container rotation so feet and shadow stay flat on the ground
+            if (frontShoe) frontShoe.rotation = -member.rotation;
+            if (backShoe) backShoe.rotation = -member.rotation;
+            if (shadow) shadow.rotation = -member.rotation;
 
             // Hands shifting slightly with arm rotation
             if (frontHand) {
@@ -332,7 +343,7 @@ export class TugScene extends Scene {
             const leanDir = -0.25 + (Math.sin(this.bobTimer * 4) * 0.05 * intensity); 
             
             member.setScale(baseCharScale);
-            member.scaleX = baseCharScale; // Force face right
+            member.scaleX = baseCharScale; // Face right toward the rope
             
             member.x = charLeftX - (i * spacing);
             member.y = charY + mBob;
@@ -348,7 +359,7 @@ export class TugScene extends Scene {
             const leanDir = 0.25 - (Math.sin(this.bobTimer * 4 + 1.5) * 0.05 * intensity); 
             
             member.setScale(baseCharScale);
-            member.scaleX = -baseCharScale; // FORCE FLIP VERY STRICTLY SO THEY FACE LEFT
+            member.scaleX = -baseCharScale; // Face left toward the rope
             
             member.x = charRightX + (i * spacing);
             member.y = charY + mBob;
