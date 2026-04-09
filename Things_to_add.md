@@ -6,7 +6,7 @@
 6. Episodes or subjects.... Coming soon    [done]
 7. If two seperate teams in seperate classrooms can play this game, by scanning QR code or through any other option... Or two separate schools...[major enhancement, will be implemented in later stages]
 8. Players displayed on screen does not seem to hold rope properly, can you adjust.. [done] [Redesigned simple rope that passes cleanly through teams to the ground with smooth physics]
-9. Simple word problems can be introduced [coming soon, this will make the game more educational and will help students to improve their problem-solving skills]
+9. Simple word problems can be introduced [coming soon, this will make the game more educational and will help students to improve their problem-solving skills[to do]
 10. make the numpads translucent ! glassmorphic to make it look better.[done]
 11. Use light music and engaging and increasingly anxious .[done - Beethoven setup + procedural gameplay]
 12. give the characters some land to stand on, instead of floating in the air. [done]

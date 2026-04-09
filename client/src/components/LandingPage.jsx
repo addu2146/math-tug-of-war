@@ -108,16 +108,16 @@ export default function LandingPage({ onSelectGame }) {
                         style={{ animationDelay: '0.3s', animationFillMode: 'both', padding: 'clamp(24px, 5vw, 40px) 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
                     >
                         <div style={{ width: 'clamp(72px, 8vw, 96px)', height: 'clamp(72px, 8vw, 96px)', borderRadius: '24px', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: 'var(--text-light)' }}>
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="General Knowledge">
-                                <path d="M12 2a10 10 0 0 0-7.09 17.09c.63.63 1.09 2.91 1.09 2.91h12s.46-2.28 1.09-2.91A10 10 0 0 0 12 2v0z" />
-                                <path d="M9 22h6" />
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Word Problems">
+                                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+                                <path d="M8 7h6M8 11h8M8 15h6"/>
                             </svg>
                         </div>
-                        <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.75rem)', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px', opacity: 0.6 }}>GK Master</h2>
+                        <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.75rem)', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px', opacity: 0.6 }}>Word Problems</h2>
                         <p style={{ fontSize: 'clamp(0.95rem, 1.5vw, 1.05rem)', color: 'var(--text-light)', lineHeight: 1.5, flex: 1, opacity: 0.8 }}>
-                            Test your knowledge! Answer rapid-fire questions covering Indian history, geography, and basic science.
+                            Simple word problems to make learning more educational and help improve students' problem-solving skills.
                         </p>
-                        <div style={{ background: '#e0e0e0', color: 'var(--text-light)', padding: '10px 20px', borderRadius: '12px', fontWeight: 800, width: '100%' }}>Under Dev 💡</div>
+                        <div style={{ background: '#e0e0e0', color: 'var(--text-light)', padding: '10px 20px', borderRadius: '12px', fontWeight: 800, width: '100%' }}>Coming Soon ⏳</div>
                     </div>
                 </div>
 
