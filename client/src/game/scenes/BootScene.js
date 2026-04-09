@@ -16,7 +16,7 @@ export class BootScene extends Scene {
         // Epic fantasy environment textures
         this.load.image('wall_stone', '/assets/textures_fantasy/PNG/wall_brick_stone_center.png');
         this.load.image('wall_banner', '/assets/textures_fantasy/PNG/wall_brick_stone_center_banner.png');
-        this.load.image('floor_stone_alley', '/assets/textures_fantasy/PNG/floor_stone_pattern.png');
+        this.load.image('floor_stone_alley', '/assets/textures_fantasy/PNG/floor_stone_trimsheet.png');
 
         // Modular Characters
         this.load.image('tint1_head', '/assets/characters/PNG/Skin/Tint 1/tint1_head.png');
