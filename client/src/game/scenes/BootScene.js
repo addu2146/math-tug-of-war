@@ -10,6 +10,25 @@ export class BootScene extends Scene {
     }
 
     preload() {
+        // Robust retry mechanism for randomly dropped assets in production
+        this.load.on('loaderror', (file) => {
+            file.retryCount = (file.retryCount || 0) + 1;
+            if (file.retryCount <= 3) {
+                console.warn(`Retrying load for ${file.key} (Attempt ${file.retryCount})`);
+                // Use a cache-buster query parameter to force a fresh network request
+                const baseUrl = file.url || file.src;
+                const cacheBuster = baseUrl.includes('?') ? `&t=${Date.now()}` : `?t=${Date.now()}`;
+                
+                if (file.type === 'image') {
+                    this.load.image(file.key, baseUrl + cacheBuster);
+                    // The loader is still active, so adding a new file will keep 'create()' 
+                    // from firing until this retry resolves (success or another error).
+                }
+            } else {
+                console.error(`Failed to load ${file.key} after 3 retries.`);
+            }
+        });
+
         this.load.image('blue_team', '/assets/blue_team.png');
         this.load.image('red_team', '/assets/red_team.png');
 
