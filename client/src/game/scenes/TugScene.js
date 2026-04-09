@@ -68,13 +68,13 @@ export class TugScene extends Scene {
         this.wall.tileScaleY = 2;
         this.wall.setTint(0x888888); // Moody dungeon lighting
         
-        // 2. Fantasy Floor (Dirt)
+        // 2. Fantasy Floor (Alleyway / Stone)
         const floorHeight = height - floorSplit;
-        this.floor = this.add.tileSprite(0, floorSplit, width, floorHeight, 'floor_dirt');
+        this.floor = this.add.tileSprite(0, floorSplit, width, floorHeight, 'floor_stone_alley');
         this.floor.setOrigin(0, 0);
         this.floor.tileScaleX = 2.5;
         this.floor.tileScaleY = 2.5;
-        this.floor.setTint(0x6b5c53); // Deeper atmospheric dirt tone
+        this.floor.setTint(0x555555); // Deeper atmospheric stone tone
 
         // 3. Decorative Center Banners hanging from the wall
         // Place one perfectly in the center, and two on the sides
@@ -170,7 +170,7 @@ export class TugScene extends Scene {
         const backLeg = this.add.image(-20, 40, 'pants' + cPrefixCap + '_long').setScale(scale).setTint(0xcccccc).setOrigin(0.5, 0.1);
         backLeg.setName('backLeg');
         const backShoe = this.add.image(-25, 110, cPrefix + 'Shoe1').setScale(scale * 0.8).setTint(0xcccccc);
-        backShoe.scaleX = -(scale * 0.8); // Rotated 180 degrees per user request
+        backShoe.setAngle(180); // Rotated 180 degrees per user request
         backShoe.setName('backShoe');
         
         const torso = this.add.image(-40, 0, cPrefix + 'Shirt1').setScale(scale);
@@ -181,7 +181,7 @@ export class TugScene extends Scene {
         const frontLeg = this.add.image(-40, 40, 'pants' + cPrefixCap + '_long').setScale(scale).setOrigin(0.5, 0.1);
         frontLeg.setName('frontLeg');
         const frontShoe = this.add.image(-45, 110, cPrefix + 'Shoe1').setScale(scale * 0.8);
-        frontShoe.scaleX = -(scale * 0.8); // Rotated 180 degrees per user request
+        frontShoe.setAngle(180); // Rotated 180 degrees per user request
         frontShoe.setName('frontShoe');
         
         const frontArm = this.add.image(-25, -15, cPrefix + 'Arm_long').setScale(scale).setOrigin(0.5, 0.2);
