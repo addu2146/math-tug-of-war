@@ -10,9 +10,9 @@ export function createGameConfig(parentId) {
     return {
         type: Phaser.AUTO,
         parent: parentId,
-        backgroundColor: '#fdfdfd',
-        width: 600,
-        height: 400,
+        transparent: true,
+        width: window.innerWidth,
+        height: window.innerHeight,
         scale: {
             mode: Phaser.Scale.RESIZE,
             autoCenter: Phaser.Scale.CENTER_BOTH,

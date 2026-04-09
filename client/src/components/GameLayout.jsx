@@ -13,6 +13,7 @@ import PlayerPanel from './PlayerPanel.jsx';
 import CenterPanel from './CenterPanel.jsx';
 import Countdown from './Countdown.jsx';
 import VictoryModal from './VictoryModal.jsx';
+import PhaserGame from '../game/PhaserGame.jsx';
 import { useWebSocket } from '../hooks/useWebSocket.js';
 import { useGameState } from '../hooks/useGameState.js';
 import { gameMusic } from '../audio/GameMusic.js';
@@ -32,11 +33,19 @@ export default function GameLayout({ onBackToMenu }) {
         setShowCountdown(true);
     }, []);
 
-    // After countdown, start the game via WebSocket and start music
+    // Load and play the setup music the second they enter GameLayout
+    useEffect(() => {
+        if (state.phase === 'setup') {
+            gameMusic.startSetupMusic();
+        }
+    }, [state.phase]);
+
+    // After countdown, start the game via WebSocket and switch to gameplay music
     const handleCountdownComplete = useCallback(() => {
         setShowCountdown(false);
         sendMessage('SETUP_GAME', { payload: gameConfig });
-        // Start urgent background music
+        
+        // Stops Beethoven, starts urgent synth background music
         gameMusic.start();
     }, [sendMessage, gameConfig]);
 
@@ -130,66 +139,99 @@ export default function GameLayout({ onBackToMenu }) {
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
+            position: 'relative',
         }}>
-            <GameHeader onBack={handleExitToMenu} />
-
-            {/* 3-Panel Game Area */}
+            {/* Absolute Background Phaser Game */}
             <div style={{
-                flex: 1,
-                display: 'flex',
-                gap: '12px',
-                padding: '12px',
-                overflow: 'hidden',
-                alignItems: 'stretch',
-                minHeight: 0,
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: 0,
+                pointerEvents: 'none',
             }}>
-                {/* Left Player Panel (Blue) */}
-                <PlayerPanel
-                    side="left"
-                    problem={state.problems.left}
-                    score={state.players.left.score}
-                    streak={state.players.left.streak}
-                    teamName={state.teamNames.left}
-                    answerResult={state.answerResults.left}
-                    onSubmitAnswer={handleSubmitAnswer}
-                    onClearResult={() => clearAnswerResult('left')}
-                    onRageQuit={handleTeamRageQuit}
-                    disabled={state.phase !== 'playing'}
-                />
+                <PhaserGame ref={phaserRef} />
+            </div>
 
-                {/* Center Panel (Scores + Timer + Phaser) */}
-                <CenterPanel
-                    leftScore={state.players.left.score}
-                    rightScore={state.players.right.score}
-                    leftTeamName={state.teamNames.left}
-                    rightTeamName={state.teamNames.right}
-                    timeRemaining={state.timeRemaining}
-                    phaserRef={phaserRef}
-                />
+            {/* Foreground UI Layer */}
+            <div style={{
+                position: 'relative',
+                zIndex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none', // pass through to panels
+            }}>
+                <div style={{ pointerEvents: 'auto' }}>
+                    <GameHeader onBack={handleExitToMenu} />
+                </div>
 
-                {/* Right Player Panel (Red) */}
-                <PlayerPanel
-                    side="right"
-                    problem={state.problems.right}
-                    score={state.players.right.score}
-                    streak={state.players.right.streak}
-                    teamName={state.teamNames.right}
-                    answerResult={state.answerResults.right}
-                    onSubmitAnswer={handleSubmitAnswer}
-                    onClearResult={() => clearAnswerResult('right')}
-                    onRageQuit={handleTeamRageQuit}
-                    disabled={state.phase !== 'playing'}
-                />
+                {/* 3-Panel Game Area */}
+                <div style={{
+                    flex: 1,
+                    display: 'flex',
+                    gap: '12px',
+                    padding: '12px',
+                    overflow: 'hidden',
+                    alignItems: 'stretch',
+                    minHeight: 0,
+                }}>
+                    {/* Left Player Panel (Blue) */}
+                    <div style={{ pointerEvents: 'auto', display: 'flex', flex: 1, maxWidth: '320px' }}>
+                        <PlayerPanel
+                            side="left"
+                            problem={state.problems.left}
+                            score={state.players.left.score}
+                            streak={state.players.left.streak}
+                            teamName={state.teamNames.left}
+                            answerResult={state.answerResults.left}
+                            onSubmitAnswer={handleSubmitAnswer}
+                            onClearResult={() => clearAnswerResult('left')}
+                            onRageQuit={handleTeamRageQuit}
+                            disabled={state.phase !== 'playing'}
+                        />
+                    </div>
+
+                    {/* Center Panel (Scores + Timer) */}
+                    <CenterPanel
+                        leftScore={state.players.left.score}
+                        rightScore={state.players.right.score}
+                        leftTeamName={state.teamNames.left}
+                        rightTeamName={state.teamNames.right}
+                        timeRemaining={state.timeRemaining}
+                    />
+
+                    {/* Right Player Panel (Red) */}
+                    <div style={{ pointerEvents: 'auto', display: 'flex', flex: 1, maxWidth: '320px' }}>
+                        <PlayerPanel
+                            side="right"
+                            problem={state.problems.right}
+                            score={state.players.right.score}
+                            streak={state.players.right.streak}
+                            teamName={state.teamNames.right}
+                            answerResult={state.answerResults.right}
+                            onSubmitAnswer={handleSubmitAnswer}
+                            onClearResult={() => clearAnswerResult('right')}
+                            onRageQuit={handleTeamRageQuit}
+                            disabled={state.phase !== 'playing'}
+                        />
+                    </div>
+                </div>
             </div>
 
             {/* Victory Modal */}
             {state.phase === 'gameOver' && (
-                <VictoryModal
-                    winner={state.winner}
-                    players={state.players}
-                    teamNames={state.teamNames}
-                    onPlayAgain={handlePlayAgain}
-                />
+                <div style={{ position: 'relative', zIndex: 10, pointerEvents: 'auto' }}>
+                    <VictoryModal
+                        winner={state.winner}
+                        players={state.players}
+                        teamNames={state.teamNames}
+                        onPlayAgain={handlePlayAgain}
+                        onExit={handleExitToMenu}
+                    />
+                </div>
             )}
         </div>
     );

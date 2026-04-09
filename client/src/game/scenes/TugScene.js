@@ -33,13 +33,16 @@ export class TugScene extends Scene {
         super({ key: 'TugScene' });
         this.ropeGfx = null;
         this.bgGfx = null;
-        this.blueTeam = null;
-        this.redTeam = null;
+        this.blueMembers = [];
+        this.redMembers = [];
+        this.numMembers = 3;
 
         this.currentOffset = 0;
         this.targetOffset = 0;
         this.gameActive = false;
         this.bobTimer = 0;
+        this.bluePullTimer = 0;
+        this.redPullTimer = 0;
 
         // Server node chain (21 points) — normalised to scene coords
         this.ropeNodes = [];
@@ -52,19 +55,56 @@ export class TugScene extends Scene {
     create() {
         const { width, height } = this.scale;
 
+        // 1. Epic Fantasy Background (Wall)
+        // Adjust the height proportion so the floor takes up the bottom 25-30%
+        const wallHeight = height * 0.8;
+        this.wall = this.add.tileSprite(0, 0, width, wallHeight, 'wall_stone');
+        this.wall.setOrigin(0, 0);
+        // We'll scale the pixel art texture slightly so it's not tiny
+        this.wall.tileScaleX = 2;
+        this.wall.tileScaleY = 2;
+        this.wall.setTint(0x888888); // Moody dungeon lighting
+        
+        // 2. Fantasy Floor (Dirt)
+        const floorHeight = height * 0.4;
+        const floorY = height - floorHeight;
+        this.floor = this.add.tileSprite(0, floorY, width, floorHeight, 'floor_dirt');
+        this.floor.setOrigin(0, 0);
+        this.floor.tileScaleX = 2.5;
+        this.floor.tileScaleY = 2.5;
+        this.floor.setTint(0x6b5c53); // Deeper atmospheric dirt tone
+
+        // 3. Decorative Center Banners hanging from the wall
+        // Place one perfectly in the center, and two on the sides
+        const bannerSpacing = width * 0.33;
+        for (let x = width * 0.17; x < width; x += bannerSpacing) {
+            const banner = this.add.image(x, 0, 'wall_banner');
+            banner.setOrigin(0.5, 0);
+            banner.setScale(3); // large pixel art banner
+            banner.setTint(0xa0a0a0); // Match lighting
+        }
+
+        // Add an overarching dark vignette/fade to the edges to make it feel deeply cinematic
+        const vignette = this.add.graphics();
+        vignette.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0.7, 0.7, 0, 0);
+        vignette.fillRect(0, 0, width, height * 0.2); // Top shadow
+        const vignetteBottom = this.add.graphics();
+        vignetteBottom.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0, 0, 0.8, 0.8);
+        vignetteBottom.fillRect(0, height * 0.8, width, height * 0.2); // Bottom shadow
+
         this.bgGfx = this.add.graphics();
         this.ropeGfx = this.add.graphics();
 
-        const charScale = this.getCharScale(height);
-        const ropeY = this.getRopeY(height);
-
-        this.blueTeam = this.add.image(0, ropeY, 'blue_team');
-        this.blueTeam.setScale(charScale);
-        this.blueTeam.setOrigin(0.78, 0.40);
-
-        this.redTeam = this.add.image(0, ropeY, 'red_team');
-        this.redTeam.setScale(charScale);
-        this.redTeam.setOrigin(0.22, 0.40);
+        // Create modular team members (Reverse order so front members draw on top)
+        for (let i = this.numMembers - 1; i >= 0; i--) {
+            const blueChar = this.createCharacter('blue');
+            this.blueMembers.unshift(blueChar); // unshift so index 0 is front member
+        }
+        
+        for (let i = this.numMembers - 1; i >= 0; i--) {
+            const redChar = this.createCharacter('red');
+            this.redMembers.unshift(redChar);
+        }
 
         this.drawBackground(width, height);
 
@@ -76,17 +116,78 @@ export class TugScene extends Scene {
 
     /* ── Helpers ───────────────────────────────────────────────────── */
 
-    getCharScale(h) { return Math.min(0.38, (h / 900) * 0.7); } // Much smaller base scale on mobile heights
-    getRopeY(h) { return h * 0.55; }
-    getRopeHalfLen(w) { return w * 0.28; }
+    getCharScale(h) { return Math.min(0.48, (h / 900) * 0.85); } // Make characters tangibly bigger
+    getRopeY(h) { return h * 0.60; } // Move them slightly lower
+    getRopeHalfLen(w) { return w * 0.15; }
 
     drawBackground(width, height) {
         this.bgGfx.clear();
         const cx = width / 2;
-        this.bgGfx.lineStyle(2, CENTER_LINE, 0.35);
-        for (let y = 5; y < height - 5; y += 22) {
-            this.bgGfx.lineBetween(cx, y, cx, Math.min(y + 12, height - 5));
+        
+        // Ground Ellipse for Point 12 - anchored precisely to visually plant feet
+        const groundWidth = width * 1.5; // very wide to pass beneath all UI 
+        const groundHeight = height * 0.25;
+        const groundY = height * 0.88; // low so it sweeps perfectly under feet
+
+        // Paint a dark shadow blob underneath them instead of bright ellipse
+        this.bgGfx.fillStyle(0x000000, 0.4); 
+        this.bgGfx.fillEllipse(cx, groundY, groundWidth, groundHeight);
+        
+        // Draw an epic glowing marker line down the center wall/floor
+        this.bgGfx.lineStyle(4, 0xD4B65A, 0.8); // Glowing golden rope color
+        for (let y = height * 0.1; y < height - 5; y += 30) {
+            this.bgGfx.lineBetween(cx, y, cx, Math.min(y + 15, height - 5));
         }
+    }
+
+    /* ================================================================
+     *  CHARACTER CREATION
+     * ================================================================ */
+    createCharacter(team) {
+        const cont = this.add.container(0, 0);
+        const scale = 0.45;
+        const isRed = team === 'red';
+        const cPrefix = isRed ? 'red' : 'blue';
+        const cPrefixCap = isRed ? 'Red' : 'Blue';
+        
+        // Origins adjusted so rotation happens at joints
+        const backArm = this.add.image(-20, -10, cPrefix + 'Arm_long').setScale(scale).setTint(0xcccccc).setOrigin(0.5, 0.2);
+        backArm.setName('backArm');
+        backArm.setRotation(Math.PI / 6); 
+
+        const backHand = this.add.image(0, 0, 'tint1_hand').setScale(scale * 0.8).setTint(0xcccccc);
+        backHand.setName('backHand');
+
+        const backLeg = this.add.image(-20, 40, 'pants' + cPrefixCap + '_long').setScale(scale).setTint(0xcccccc).setOrigin(0.5, 0.1);
+        backLeg.setName('backLeg');
+        const backShoe = this.add.image(-25, 110, cPrefix + 'Shoe1').setScale(scale * 0.8).setTint(0xcccccc);
+        backShoe.scaleX = -(scale * 0.8); // Points towards the rope
+        backShoe.setName('backShoe');
+        
+        const torso = this.add.image(-40, 0, cPrefix + 'Shirt1').setScale(scale);
+        
+        const head = this.add.image(-40, -80, 'tint1_head').setScale(scale);
+        const face = this.add.image(-20, -80, 'face1').setScale(scale);
+        
+        const frontLeg = this.add.image(-40, 40, 'pants' + cPrefixCap + '_long').setScale(scale).setOrigin(0.5, 0.1);
+        frontLeg.setName('frontLeg');
+        const frontShoe = this.add.image(-45, 110, cPrefix + 'Shoe1').setScale(scale * 0.8);
+        frontShoe.scaleX = -(scale * 0.8); // Points towards the rope
+        frontShoe.setName('frontShoe');
+        
+        const frontArm = this.add.image(-25, -15, cPrefix + 'Arm_long').setScale(scale).setOrigin(0.5, 0.2);
+        frontArm.setName('frontArm');
+        frontArm.setRotation(Math.PI / 8); 
+        
+        const frontHand = this.add.image(0, 0, 'tint1_hand').setScale(scale * 0.8);
+        frontHand.setName('frontHand');
+
+        cont.add([backArm, backHand, backLeg, backShoe, torso, head, face, frontLeg, frontShoe, frontArm, frontHand]);
+        
+        // Initial setup
+        if (isRed) cont.scaleX = -1;
+        
+        return cont;
     }
 
     /* ================================================================
@@ -96,8 +197,20 @@ export class TugScene extends Scene {
     onServerUpdate(data) {
         if (data.progress !== undefined) {
             const { width } = this.scale;
-            const maxShift = width * 0.25;
-            this.targetOffset = data.progress * maxShift;
+            // Limit how far they can be dragged off screen so they stay 
+            // under the glass but don't disappear entirely
+            const maxShift = width * 0.15; 
+            const newTarget = data.progress * maxShift;
+            
+            // Check if team pulled!
+            if (this.targetOffset !== newTarget) {
+                if (newTarget < this.targetOffset) {
+                    this.bluePullTimer = 1.2; // animate for 1.2s
+                } else if (newTarget > this.targetOffset) {
+                    this.redPullTimer = 1.2;
+                }
+            }
+            this.targetOffset = newTarget;
         }
         // Capture the full server node chain
         if (data.ropeNodes && data.ropeNodes.length) {
@@ -115,16 +228,18 @@ export class TugScene extends Scene {
     onGameOver(data) {
         this.gameActive = false;
         if (data && data.winner && data.winner !== 'draw') {
-            const winner = data.winner === 'left' ? this.blueTeam : this.redTeam;
-            if (winner) {
-                this.tweens.add({
-                    targets: winner,
-                    scaleX: winner.scaleX * 1.2,
-                    scaleY: winner.scaleY * 1.2,
-                    duration: 250,
-                    yoyo: true,
-                    repeat: 3,
-                    ease: 'Sine.easeInOut',
+            const winners = data.winner === 'left' ? this.blueMembers : this.redMembers;
+            if (winners) {
+                winners.forEach(member => {
+                    this.tweens.add({
+                        targets: member,
+                        scaleX: member.scaleX * 1.2,
+                        scaleY: member.scaleY * 1.2,
+                        duration: 250,
+                        yoyo: true,
+                        repeat: 3,
+                        ease: 'Sine.easeInOut',
+                    });
                 });
             }
         }
@@ -135,6 +250,7 @@ export class TugScene extends Scene {
      * ================================================================ */
 
     update(time, delta) {
+        const dtSeconds = delta / 1000;
         this.bobTimer += delta * 0.003;
 
         // Smooth offset interpolation
@@ -144,42 +260,92 @@ export class TugScene extends Scene {
         const { width, height } = this.scale;
         const cx = width / 2;
         const ropeY = this.getRopeY(height);
-        const halfLen = this.getRopeHalfLen(width);
         const charScale = this.getCharScale(height);
 
-        // Two separate spreads: characters are positioned at CHAR spread,
-        // rope extends further to ROPE spread so it overlaps INTO the sprites.
-        const charHalf = width * 0.28;   // character anchor spread
-        const ropeHalf = width * 0.38;   // rope endpoints (wider, reaches into sprites)
-
+        // Character anchor spread
+        const charHalf = Math.max(120, width * 0.16);
         const charLeftX = cx - charHalf + this.currentOffset;
         const charRightX = cx + charHalf + this.currentOffset;
-        const ropeLeftX = cx - ropeHalf + this.currentOffset;
-        const ropeRightX = cx + ropeHalf + this.currentOffset;
 
-        // Character bobbing
-        const bob = Math.sin(this.bobTimer * 2) * 2.5;
-        const leanBlue = Math.sin(this.bobTimer * 3) * 0.04;
-        const leanRed = Math.sin(this.bobTimer * 3 + 1.5) * 0.04;
+        const baseCharScale = charScale * 1.2;
+        const spacing = 80 * baseCharScale;
 
-        if (this.blueTeam) {
-            this.blueTeam.setScale(charScale);
-            this.blueTeam.x = charLeftX;
-            this.blueTeam.y = ropeY + bob;
-            this.blueTeam.rotation = -0.1 + leanBlue;
-        }
-        if (this.redTeam) {
-            this.redTeam.setScale(charScale);
-            this.redTeam.x = charRightX;
-            this.redTeam.y = ropeY + bob;
-            this.redTeam.rotation = 0.1 + leanRed;
-        }
+        const charY = ropeY;
+        const attachY = charY; // Nodes map to exact hand positions 
 
-        // Build the scene-space rope points
-        const sceneNodes = this.buildSceneNodes(ropeLeftX, ropeRightX, ropeY);
+        if (this.bluePullTimer > 0) this.bluePullTimer -= dtSeconds;
+        if (this.redPullTimer > 0) this.redPullTimer -= dtSeconds;
 
-        // Draw 3D rope
-        this.drawRope3D(sceneNodes, ropeY);
+        // Shared function for animating limbs in the update loop
+        const animateLimbs = (member, offset, isRed, intensity) => {
+            const time = this.bobTimer * 8 + offset;
+            // Dampen animation amplitude if intensity is 0
+            const pullAmt = Math.max(0, Math.min(1, intensity * 2)); 
+            
+            const frontArm = member.getByName('frontArm');
+            const backArm = member.getByName('backArm');
+            const frontLeg = member.getByName('frontLeg');
+            const backLeg = member.getByName('backLeg');
+            const frontHand = member.getByName('frontHand');
+            const backHand = member.getByName('backHand');
+
+            // Strainy pulling arm motion only active when pullAmt > 0
+            if (frontArm) frontArm.rotation = (Math.PI / 8) + (Math.sin(time) * 0.2 * pullAmt);
+            if (backArm) backArm.rotation = (Math.PI / 6) + (Math.cos(time) * 0.2 * pullAmt);
+
+            // Legs planting and pushing only when pulling
+            if (frontLeg) frontLeg.rotation = (Math.sin(time + 1) * 0.15) * pullAmt;
+            if (backLeg) backLeg.rotation = -0.1 + (Math.cos(time + 1) * 0.15) * pullAmt;
+
+            // Hands shifting slightly with arm rotation
+            if (frontHand) {
+                frontHand.y = 10 + (Math.sin(time) * 5) * pullAmt;
+                frontHand.x = (Math.cos(time) * 5) * pullAmt;
+            }
+            if (backHand) {
+                backHand.y = (Math.cos(time) * 5) * pullAmt;
+                backHand.x = (Math.sin(time) * 5) * pullAmt;
+            }
+        };
+
+        // Update blue members (staggered bobs and leans)
+        this.blueMembers.forEach((member, i) => {
+            const intensity = this.bluePullTimer > 0 ? 1 : 0;
+            const mBob = (Math.sin(this.bobTimer * 5 + i) * 2) * intensity;
+            // When not actively pulling, lean slightly back in a rigid pose. When pulling, yank back and forth.
+            const leanDir = -0.25 + (Math.sin(this.bobTimer * 4) * 0.05 * intensity); 
+            
+            member.setScale(baseCharScale);
+            member.scaleX = baseCharScale; // Force face right
+            
+            member.x = charLeftX - (i * spacing);
+            member.y = charY + mBob;
+            member.rotation = leanDir;
+            
+            animateLimbs(member, i, false, intensity);
+        });
+
+        // Update red members
+        this.redMembers.forEach((member, i) => {
+            const intensity = this.redPullTimer > 0 ? 1 : 0;
+            const mBob = (Math.sin(this.bobTimer * 5 + i + 1.5) * 2) * intensity;
+            const leanDir = 0.25 - (Math.sin(this.bobTimer * 4 + 1.5) * 0.05 * intensity); 
+            
+            member.setScale(baseCharScale);
+            member.scaleX = -baseCharScale; // FORCE FLIP VERY STRICTLY SO THEY FACE LEFT
+            
+            member.x = charRightX + (i * spacing);
+            member.y = charY + mBob;
+            member.rotation = leanDir;
+            
+            animateLimbs(member, i + 1.5, true, intensity);
+        });
+
+        // Build the scene-space rope points spanning through the characters to the ground
+        const sceneNodes = this.buildSceneNodes(charLeftX, charRightX, attachY);
+
+        // Draw simple clean rope
+        this.drawRope3D(sceneNodes, attachY, cx + this.currentOffset);
     }
 
     /* ================================================================
@@ -187,15 +353,22 @@ export class TugScene extends Scene {
      * ================================================================ */
 
     /**
-     * Map the 21 server nodes (in server-space 0-800) into canvas-space,
-     * OR generate a synthetic catenary if no server data yet.
+     * Map the 21 server nodes for the center, and append tails that 
+     * span through the team members and connect to the ground.
      */
     buildSceneNodes(leftX, rightX, ropeY) {
         const count = 21;
-        const nodes = [];
+        const physicsNodes = [];
+        const baseCharScale = this.getCharScale(this.scale.height) * 1.2;
+        const spacing = 80 * baseCharScale;
 
+        // Add tail nodes passing through the Blue Team hands
+        for (let i = this.numMembers - 1; i > 0; i--) {
+            physicsNodes.push({ x: leftX - (i * spacing), y: ropeY });
+        }
+
+        // 1. Center physics section (taut in the middle)
         if (this.ropeNodes.length === count) {
-            // Server data available — map from server coords to scene coords
             const srvLeft = this.ropeNodes[0];
             const srvRight = this.ropeNodes[count - 1];
             const srvW = srvRight.x - srvLeft.x || 1;
@@ -204,91 +377,60 @@ export class TugScene extends Scene {
             for (let i = 0; i < count; i++) {
                 const t = (this.ropeNodes[i].x - srvLeft.x) / srvW;
                 const sx = leftX + t * sceneW;
-                // Map server Y deviation into scene-space (scale down for subtlety)
-                const srvYDev = this.ropeNodes[i].y - 300; // 300 is server REST_Y
+                // Map server Y deviation into scene-space
+                const srvYDev = this.ropeNodes[i].y - 300; 
                 const sy = ropeY + srvYDev * (sceneW / 800) * 0.45;
-                nodes.push({ x: sx, y: sy });
+                physicsNodes.push({ x: sx, y: sy });
             }
         } else {
-            // Synthetic catenary fallback
+            // Synthetic tight fallback
             for (let i = 0; i < count; i++) {
                 const t = i / (count - 1);
                 const sx = leftX + t * (rightX - leftX);
-                const sag = Math.sin(t * Math.PI) * 18;
-                nodes.push({ x: sx, y: ropeY + sag });
+                const sag = Math.sin(t * Math.PI) * 12;
+                physicsNodes.push({ x: sx, y: ropeY + sag });
             }
         }
-        return nodes;
+
+        // Add tail nodes passing through the Red Team hands
+        for (let i = 1; i < this.numMembers; i++) {
+            physicsNodes.push({ x: rightX + (i * spacing), y: ropeY });
+        }
+
+        return physicsNodes;
     }
 
     /* ================================================================
-     *  3-D BRAIDED ROPE RENDERER
+     *  CLEAN SIMPLE ROPE RENDERER
      * ================================================================ */
 
-    drawRope3D(nodes, ropeY) {
+    drawRope3D(nodes, ropeY, centerWorldX) {
         this.ropeGfx.clear();
         if (nodes.length < 2) return;
 
         const h = this.scale.height;
         const sF = Math.max(0.3, h / 900); // Scale factor based on 900px height baseline
-        const ROPE_WIDTH_S = ROPE_WIDTH * sF;
-        const SHADOW_WIDTH_S = SHADOW_WIDTH * sF;
-        const STRAND_OFFSET_S = STRAND_OFFSET * sF;
-        const BRAID_PERIOD_S = BRAID_PERIOD * sF;
+        
+        // Simple clean rope aesthetics
+        const OUTLINE_WIDTH = 12 * sF;
+        const CORE_WIDTH = 8 * sF;
 
         // 1. Catmull-Rom spline → smooth curve
         const spline = this.catmullRomSpline(nodes, SPLINE_SAMPLES);
         if (spline.length < 4) return;
-
-        // Precompute tangents & normals
-        const tangents = [];
-        const normals = [];
-        for (let i = 0; i < spline.length; i++) {
-            const prev = spline[Math.max(0, i - 1)];
-            const next = spline[Math.min(spline.length - 1, i + 1)];
-            const dx = next.x - prev.x;
-            const dy = next.y - prev.y;
-            const len = Math.sqrt(dx * dx + dy * dy) || 1;
-            tangents.push({ x: dx / len, y: dy / len });
-            normals.push({ x: -dy / len, y: dx / len });
-        }
-
-        // 2. Build twin braid strands
-        const strandA = [];
-        const strandB = [];
-        let accumDist = 0;
-        for (let i = 0; i < spline.length; i++) {
-            if (i > 0) {
-                const dx = spline[i].x - spline[i - 1].x;
-                const dy = spline[i].y - spline[i - 1].y;
-                accumDist += Math.sqrt(dx * dx + dy * dy);
-            }
-            // Sinusoidal braid cross-over
-            const braidPhase = Math.sin((accumDist / BRAID_PERIOD_S) * Math.PI * 2);
-            const offA = STRAND_OFFSET_S * braidPhase;
-            const offB = -STRAND_OFFSET_S * braidPhase;
-
-            strandA.push({
-                x: spline[i].x + normals[i].x * offA,
-                y: spline[i].y + normals[i].y * offA,
-            });
-            strandB.push({
-                x: spline[i].x + normals[i].x * offB,
-                y: spline[i].y + normals[i].y * offB,
-            });
-        }
-
-        // ── Layer 1: Wide shadow ────────────────────────────────────
-        this.ropeGfx.lineStyle(SHADOW_WIDTH_S, ROPE_SHADOW, 0.12);
-        this.ropeGfx.beginPath();
-        this.ropeGfx.moveTo(spline[0].x, spline[0].y + 4);
+        
+        // Compute lengths for texturing
+        let totalLen = 0;
+        const lengths = [0];
         for (let i = 1; i < spline.length; i++) {
-            this.ropeGfx.lineTo(spline[i].x, spline[i].y + 4);
+            const dx = spline[i].x - spline[i - 1].x;
+            const dy = spline[i].y - spline[i - 1].y;
+            totalLen += Math.sqrt(dx * dx + dy * dy);
+            lengths.push(totalLen);
         }
-        this.ropeGfx.strokePath();
 
-        // ── Layer 2: Dark base body ─────────────────────────────────
-        this.ropeGfx.lineStyle(ROPE_WIDTH_S + (4 * sF), ROPE_DARK, 0.85);
+        // ── Layer 1: Dark Outline / Shadow ──────────────────────────
+        this.ropeGfx.lineStyle(OUTLINE_WIDTH, 0x5C4415, 1); 
         this.ropeGfx.beginPath();
         this.ropeGfx.moveTo(spline[0].x, spline[0].y);
         for (let i = 1; i < spline.length; i++) {
@@ -296,73 +438,69 @@ export class TugScene extends Scene {
         }
         this.ropeGfx.strokePath();
 
-        // ── Layer 3: Strand A (bottom/dark strand) ──────────────────
-        this.ropeGfx.lineStyle(ROPE_WIDTH_S, ROPE_BASE, 1);
+        // ── Layer 2: Inner Base Body ───────────────────────────────
+        this.ropeGfx.lineStyle(CORE_WIDTH, 0x9E7B2F, 1); 
         this.ropeGfx.beginPath();
-        this.ropeGfx.moveTo(strandA[0].x, strandA[0].y);
-        for (let i = 1; i < strandA.length; i++) {
-            this.ropeGfx.lineTo(strandA[i].x, strandA[i].y);
-        }
-        this.ropeGfx.strokePath();
-
-        // ── Layer 4: Strand B (top/light strand) ────────────────────
-        this.ropeGfx.lineStyle(ROPE_WIDTH_S, ROPE_LIGHT, 0.8);
-        this.ropeGfx.beginPath();
-        this.ropeGfx.moveTo(strandB[0].x, strandB[0].y);
-        for (let i = 1; i < strandB.length; i++) {
-            this.ropeGfx.lineTo(strandB[i].x, strandB[i].y);
-        }
-        this.ropeGfx.strokePath();
-
-        // ── Layer 5: Highlight edge (top) ───────────────────────────
-        this.ropeGfx.lineStyle(1.5 * sF, 0xF5E6B0, 0.35);
-        this.ropeGfx.beginPath();
-        const highlightOff = 3 * sF;
-        this.ropeGfx.moveTo(spline[0].x + normals[0].x * -highlightOff, spline[0].y + normals[0].y * -highlightOff);
+        this.ropeGfx.moveTo(spline[0].x, spline[0].y);
         for (let i = 1; i < spline.length; i++) {
-            this.ropeGfx.lineTo(
-                spline[i].x + normals[i].x * -highlightOff,
-                spline[i].y + normals[i].y * -highlightOff,
-            );
+            this.ropeGfx.lineTo(spline[i].x, spline[i].y);
+        }
+        this.ropeGfx.strokePath();
+        
+        // ── Layer 3: Rope Segment Dashes ──────────────────────────────
+        const segmentPeriod = 15 * sF;
+        this.ropeGfx.lineStyle(CORE_WIDTH, 0xD4B65A, 0.9);
+        this.ropeGfx.beginPath();
+        
+        let drawing = false;
+        let pIndex = 0;
+        
+        for (let t = 0; t <= totalLen; t += 2) {
+            // Find current spline segment
+            while (pIndex < lengths.length - 1 && lengths[pIndex + 1] < t) {
+                pIndex++;
+            }
+            
+            const l0 = lengths[pIndex];
+            const l1 = lengths[pIndex + 1] || (l0 + 1);
+            const ratio = (t - l0) / (l1 - l0);
+            
+            const pt0 = spline[pIndex];
+            const pt1 = spline[pIndex + 1] || pt0;
+            
+            const x = pt0.x + (pt1.x - pt0.x) * ratio;
+            const y = pt0.y + (pt1.y - pt0.y) * ratio;
+            
+            const stage = (t % segmentPeriod) / segmentPeriod;
+            if (stage < 0.5) {
+                if (!drawing) {
+                    this.ropeGfx.moveTo(x, y);
+                    drawing = true;
+                } else {
+                    this.ropeGfx.lineTo(x, y);
+                }
+            } else {
+                drawing = false;
+            }
         }
         this.ropeGfx.strokePath();
 
-        // ── Layer 6: Knot wraps ─────────────────────────────────────
-        accumDist = 0;
-        const KNOT_SPACING_S = KNOT_SPACING * sF;
-        for (let i = 1; i < spline.length; i++) {
-            const dx = spline[i].x - spline[i - 1].x;
-            const dy = spline[i].y - spline[i - 1].y;
-            accumDist += Math.sqrt(dx * dx + dy * dy);
-            if (accumDist >= KNOT_SPACING_S) {
-                accumDist = 0;
-                this.drawKnot(spline[i], normals[i], tangents[i], sF, ROPE_WIDTH_S);
+        // ── Center Flag Tracking ────────────────────────────────────
+        let flagPt = spline[Math.floor(spline.length / 2)];
+        if (centerWorldX !== undefined) {
+            let minDist = Infinity;
+            for (let i = 0; i < spline.length; i++) {
+                const dist = Math.abs(spline[i].x - centerWorldX);
+                if (dist < minDist) {
+                    minDist = dist;
+                    flagPt = spline[i];
+                }
             }
         }
 
-        // ── Flag at center node (node 10 of 21) ────────────────────
-        const centerIdx = Math.floor(spline.length / 2);
-        const flagPt = spline[centerIdx];
-        this.drawFlag(flagPt.x, flagPt.y, sF);
-    }
-
-    /* ── Knot wrap decoration ────────────────────────────────────── */
-    drawKnot(pt, normal, tangent, sF, ropeWidthS) {
-        const r = ropeWidthS + (3 * sF);
-        // Short diagonal wraps
-        this.ropeGfx.lineStyle(2.5 * sF, ROPE_DARK, 0.55);
-        const wrapOff = 3 * sF;
-        for (let j = -1; j <= 1; j++) {
-            const cx = pt.x + tangent.x * j * wrapOff;
-            const cy = pt.y + tangent.y * j * wrapOff;
-            this.ropeGfx.lineBetween(
-                cx + normal.x * r, cy + normal.y * r,
-                cx - normal.x * r, cy - normal.y * r,
-            );
+        if (flagPt) {
+            this.drawFlag(flagPt.x, flagPt.y, sF);
         }
-        // Highlight dot at center
-        this.ropeGfx.fillStyle(ROPE_LIGHT, 0.5);
-        this.ropeGfx.fillCircle(pt.x, pt.y, 2 * sF);
     }
 
     /* ── Flag rendering ──────────────────────────────────────────── */

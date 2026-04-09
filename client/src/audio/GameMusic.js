@@ -37,65 +37,66 @@ export class GameMusic {
     constructor() {
         this.ctx = null;
         this.isPlaying = false;
-        this.masterGain = null;
-        this.droneGain = null;
-        this.droneOscs = [];
+        
+        // HTMLAudioElements for actual MP3 tracks
+        this.setupAudio = null;
+        this.gameAudio = null;
+        this.timeoutIds = [];
         this.intervalIds = [];
+        this.droneOscs = [];
     }
 
     init() {
-        if (this.ctx) return;
+        if (this.setupAudio) return;
+        
+        // Classic Beethoven for the lobby
+        this.setupAudio = new Audio('/assets/setup_music.mp3');
+        this.setupAudio.loop = true;
+        this.setupAudio.volume = 0.4;
+        
+        // 1812 Overture for the gameplay
+        this.gameAudio = new Audio('/assets/game_music.mp3');
+        this.gameAudio.loop = true;
+        this.gameAudio.volume = 0.6;
+        
+        // We still need the AudioContext for the right/wrong SFX!
         this.ctx = new (window.AudioContext || window.webkitAudioContext)();
         this.masterGain = this.ctx.createGain();
-        this.masterGain.gain.value = 0.30;
+        this.masterGain.gain.value = 0.60;
         this.masterGain.connect(this.ctx.destination);
+    }
+    
+    // Call this the moment SetupWizard mounts
+    startSetupMusic() {
+        this.init();
+        if (this.setupAudio && this.setupAudio.paused) {
+            // The file is now physically trimmed to the best 35 seconds (the iconic opening motif)
+            this.setupAudio.currentTime = 0;
+            this.setupAudio.play().catch(e => console.warn('Audio blocked until interaction', e));
+        }
+    }
+    
+    stopSetupMusic() {
+        if (this.setupAudio) {
+            this.setupAudio.pause();
+            this.setupAudio.currentTime = 0;
+        }
+        this.timeoutIds.forEach(id => clearInterval(id));
+        this.timeoutIds = [];
     }
 
     start() {
+        this.stopSetupMusic();
+        
         if (this.isPlaying) return;
         this.init();
         if (this.ctx.state === 'suspended') this.ctx.resume();
         this.isPlaying = true;
 
-        this.startDrone();
-
-        const bpm = 160; // Fast & energetic
-        const beatMs = 60000 / bpm;
-        let beat = 0;
-        let patternIndex = 0;
-
-        const loop = setInterval(() => {
-            if (!this.isPlaying) return;
-            const now = this.ctx.currentTime;
-
-            // ── Tabla rhythm ──
-            const tablaStep = beat % TABLA_PATTERN.length;
-            const bol = TABLA_PATTERN[tablaStep];
-            this.playTabla(now, bol);
-
-            // ── Dhol bass on 1 & 9 of 16 (strong beats) ──
-            if (tablaStep === 0 || tablaStep === 8) {
-                this.playDhol(now);
-            }
-
-            // ── Ghungroo shimmer on every beat ──
-            this.playGhungroo(now);
-
-            // ── Sitar melody — one note per beat ──
-            const pattern = MELODY_PATTERNS[patternIndex % MELODY_PATTERNS.length];
-            const noteIdx = beat % pattern.length;
-            this.playSitar(now, pattern[noteIdx]);
-
-            // ── Ornamental taan (fast run) every 16 beats ──
-            if (beat % 16 === 0 && beat > 0) {
-                this.playTaan(now);
-                patternIndex++; // switch melody pattern
-            }
-
-            beat++;
-        }, beatMs);
-
-        this.intervalIds.push(loop);
+        if (this.gameAudio) {
+            this.gameAudio.currentTime = 0;
+            this.gameAudio.play().catch(e => console.warn('Game audio blocked until interaction', e));
+        }
     }
 
     /* ================================================================
@@ -366,6 +367,15 @@ export class GameMusic {
 
     stop() {
         this.isPlaying = false;
+        
+        // Stop lobby music if it happens to be playing
+        this.stopSetupMusic();
+
+        if (this.gameAudio) {
+            this.gameAudio.pause();
+            this.gameAudio.currentTime = 0;
+        }
+
         this.intervalIds.forEach(id => clearInterval(id));
         this.intervalIds = [];
         // Stop drone oscillators
@@ -380,6 +390,16 @@ export class GameMusic {
         if (this.ctx) {
             this.ctx.close().catch(() => { });
             this.ctx = null;
+        }
+        if (this.setupAudio) {
+            this.setupAudio.pause();
+            this.setupAudio.src = '';
+            this.setupAudio = null;
+        }
+        if (this.gameAudio) {
+            this.gameAudio.pause();
+            this.gameAudio.src = '';
+            this.gameAudio = null;
         }
     }
 }

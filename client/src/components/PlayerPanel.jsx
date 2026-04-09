@@ -73,7 +73,11 @@ export default function PlayerPanel({
                 flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
-                background: panelBg,
+                background: isLeft ? 'rgba(227, 242, 253, 0.4)' : 'rgba(255, 235, 238, 0.4)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                border: isLeft ? '2px solid rgba(227, 242, 253, 0.8)' : '2px solid rgba(255, 235, 238, 0.8)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.05)',
                 touchAction: 'none',
                 maxWidth: '320px',
                 minHeight: 0,
@@ -113,10 +117,41 @@ export default function PlayerPanel({
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 'min(10px, 1.2vh)',
-                background: 'white',
+                background: 'transparent',
                 margin: '0',
                 minHeight: 0,
             }}>
+                {/* Streak indicator - High visibility area */}
+                {streak > 1 && (
+                    <div className="streak-indicator" style={{
+                        textAlign: 'center',
+                        fontSize: '1.8rem',
+                        fontWeight: 900,
+                        color: streak >= 6 ? '#00e5ff' : streak >= 4 ? '#ff3300' : '#ffa500',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        margin: '-4px 0 min(4px, 0.5vh)'
+                    }}>
+                        <svg 
+                            width={streak >= 6 ? "42" : streak >= 4 ? "36" : "30"} 
+                            height={streak >= 6 ? "42" : streak >= 4 ? "36" : "30"} 
+                            viewBox="0 0 24 24" 
+                            fill="currentColor" 
+                            stroke="none" 
+                            aria-label="Fire"
+                            style={{
+                                filter: streak >= 6 ? 'drop-shadow(0 0 8px #00e5ff)' : streak >= 4 ? 'drop-shadow(0 0 6px #ff3300)' : 'none',
+                                transition: 'all 0.3s ease'
+                            }}
+                        >
+                            <path d="M17.5 11.5c-1.5-1.5-2.5-4-2-6-3.5 2-4 6-3.5 8 0 0-2-1.5-2-4-2.5 2.5-4 7-2 10.5 1.5 2.5 4.5 4 7.5 4s6-1.5 7.5-4c2-3.5.5-8-2-10.5-1.5 1-2.5 1.5-3.5 2z" />
+                        </svg>
+                        <span>{streak}</span>
+                    </div>
+                )}
+
                 {/* Math Problem */}
                 <div className={`math-problem ${answerResult === 'incorrect' ? 'animate-shake' : ''}`} style={{
                     textAlign: 'center',
@@ -148,23 +183,6 @@ export default function PlayerPanel({
                     onSubmit={handleSubmit}
                     disabled={disabled || answerResult !== null}
                 />
-
-                {/* Streak indicator */}
-                {streak > 1 && (
-                    <div style={{
-                        textAlign: 'center',
-                        fontSize: '0.85rem',
-                        fontWeight: 700,
-                        color: 'var(--gold)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '4px'
-                    }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-label="Streak"><path d="M12 2c1.92 4.4 2.82 8.35 1.5 12h-3c-1.32-3.65-.42-7.6 1.5-12Z"/><path d="M12 22a8 8 0 1 0-8-8c0 3.3 2.1 6.1 5 7.4"/></svg>
-                        {streak} streak!
-                    </div>
-                )}
 
                 {/* Team Rage Quit / Forfeit Button */}
                 <button

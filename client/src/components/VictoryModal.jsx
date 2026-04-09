@@ -4,7 +4,7 @@
 
 import React from 'react';
 
-export default function VictoryModal({ winner, players, teamNames, onPlayAgain }) {
+export default function VictoryModal({ winner, players, teamNames, onPlayAgain, onExit }) {
     const isDraw = winner === 'draw';
     const winnerName = isDraw ? 'Draw!' : (winner === 'left' ? teamNames?.left : teamNames?.right);
     const winnerColor = isDraw ? 'var(--gold)' : (winner === 'left' ? 'var(--blue)' : 'var(--red)');
@@ -67,14 +67,34 @@ export default function VictoryModal({ winner, players, teamNames, onPlayAgain }
                     </div>
                 </div>
 
-                <button
-                    className="btn-game btn-blue"
-                    onPointerDown={(e) => { e.preventDefault(); onPlayAgain(); }}
-                    style={{ width: '100%', marginTop: '8px', display: 'flex', justifyContent: 'center', gap: '8px' }}
-                >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Play Again"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                    Play Again
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+                    <button
+                        className="btn-game btn-blue"
+                        onPointerDown={(e) => { e.preventDefault(); onPlayAgain(); }}
+                        style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '8px' }}
+                    >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Play Again"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                        Play Again
+                    </button>
+                    {onExit && (
+                        <button
+                            className="btn-game"
+                            onPointerDown={(e) => { e.preventDefault(); onExit(); }}
+                            style={{ 
+                                width: '100%', 
+                                display: 'flex', 
+                                justifyContent: 'center', 
+                                gap: '8px',
+                                background: 'transparent',
+                                color: 'var(--text-light)',
+                                border: '2px solid var(--text-light)',
+                            }}
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Exit"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Exit to Menu
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );

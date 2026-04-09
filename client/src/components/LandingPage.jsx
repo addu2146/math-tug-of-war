@@ -108,24 +108,34 @@ export default function LandingPage({ onSelectGame }) {
                         style={{ animationDelay: '0.3s', animationFillMode: 'both', padding: 'clamp(24px, 5vw, 40px) 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
                     >
                         <div style={{ width: 'clamp(72px, 8vw, 96px)', height: 'clamp(72px, 8vw, 96px)', borderRadius: '24px', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: 'var(--text-light)' }}>
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Science">
-                                <path d="M9 3v8l-6 8h18l-6-8V3"/><path d="M9 3h6"/><path d="M14 10.5 12 12l-2-1.5"/><path d="M7 16h10"/>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="General Knowledge">
+                                <path d="M12 2a10 10 0 0 0-7.09 17.09c.63.63 1.09 2.91 1.09 2.91h12s.46-2.28 1.09-2.91A10 10 0 0 0 12 2v0z" />
+                                <path d="M9 22h6" />
                             </svg>
                         </div>
-                        <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.75rem)', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px', opacity: 0.6 }}>Lab Dash</h2>
+                        <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.75rem)', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px', opacity: 0.6 }}>GK Master</h2>
                         <p style={{ fontSize: 'clamp(0.95rem, 1.5vw, 1.05rem)', color: 'var(--text-light)', lineHeight: 1.5, flex: 1, opacity: 0.8 }}>
-                            Mix elements and balance chemical equations fast to outpace the timer!
+                            Test your knowledge! Answer rapid-fire questions covering Indian history, geography, and basic science.
                         </p>
-                        <div style={{ background: '#e0e0e0', color: 'var(--text-light)', padding: '10px 20px', borderRadius: '12px', fontWeight: 800, width: '100%' }}>Under Dev 🔬</div>
+                        <div style={{ background: '#e0e0e0', color: 'var(--text-light)', padding: '10px 20px', borderRadius: '12px', fontWeight: 800, width: '100%' }}>Under Dev 💡</div>
                     </div>
                 </div>
 
-                <footer className="animate-pop-in" style={{ animationDelay: '0.4s', animationFillMode: 'both', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: 'auto', paddingTop: '64px', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-light)', width: '100%' }}>
-                    Developed with 
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--red)" stroke="var(--red)" strokeWidth="1" aria-label="love">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                    </svg> 
-                    at GHS Vizer
+                <footer className="animate-pop-in" style={{ animationDelay: '0.4s', animationFillMode: 'both', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: 'auto', paddingTop: '64px', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-light)', width: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        Developed with 
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--red)" stroke="var(--red)" strokeWidth="1" aria-label="love">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg> 
+                        at GHS Vizer
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '0.8rem', fontWeight: 600, opacity: 0.8 }}>
+                        <span>&copy; 2026 EduGames</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }} title="Contact Developer">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 3.4L3 21"/><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/></svg>
+                            +91 99062 78589
+                        </span>
+                    </div>
                 </footer>
             </div>
         </div>

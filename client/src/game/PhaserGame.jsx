@@ -1,6 +1,6 @@
 /**
  * PhaserGame — React mount/destroy wrapper.
- * Phaser canvas is NOT transparent anymore — sits inside the CenterPanel card.
+ * Phaser canvas is transparent — sits absolute in GameLayout background.
  */
 
 import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
