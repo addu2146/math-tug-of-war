@@ -43,6 +43,8 @@ export class TugScene extends Scene {
         this.bobTimer = 0;
         this.bluePullTimer = 0;
         this.redPullTimer = 0;
+        this.lastBlueScore = 0;
+        this.lastRedScore = 0;
 
         // Server node chain (21 points) — normalised to scene coords
         this.ropeNodes = [];
@@ -161,7 +163,7 @@ export class TugScene extends Scene {
         const backLeg = this.add.image(-20, 40, 'pants' + cPrefixCap + '_long').setScale(scale).setTint(0xcccccc).setOrigin(0.5, 0.1);
         backLeg.setName('backLeg');
         const backShoe = this.add.image(-25, 110, cPrefix + 'Shoe1').setScale(scale * 0.8).setTint(0xcccccc);
-        backShoe.scaleX = -(scale * 0.8); // Points towards the rope
+        backShoe.scaleX = (scale * 0.8); // Fixed to face natural forward direction
         backShoe.setName('backShoe');
         
         const torso = this.add.image(-40, 0, cPrefix + 'Shirt1').setScale(scale);
@@ -172,7 +174,7 @@ export class TugScene extends Scene {
         const frontLeg = this.add.image(-40, 40, 'pants' + cPrefixCap + '_long').setScale(scale).setOrigin(0.5, 0.1);
         frontLeg.setName('frontLeg');
         const frontShoe = this.add.image(-45, 110, cPrefix + 'Shoe1').setScale(scale * 0.8);
-        frontShoe.scaleX = -(scale * 0.8); // Points towards the rope
+        frontShoe.scaleX = (scale * 0.8); // Fixed to face natural forward direction
         frontShoe.setName('frontShoe');
         
         const frontArm = this.add.image(-25, -15, cPrefix + 'Arm_long').setScale(scale).setOrigin(0.5, 0.2);
@@ -202,12 +204,15 @@ export class TugScene extends Scene {
             const maxShift = width * 0.15; 
             const newTarget = data.progress * maxShift;
             
-            // Check if team pulled!
-            if (this.targetOffset !== newTarget) {
-                if (newTarget < this.targetOffset) {
+            // Check if team pulled based on exact score increments, NOT fluctuating physics target
+            if (data.players) {
+                if (data.players.left && data.players.left.score > this.lastBlueScore) {
                     this.bluePullTimer = 1.2; // animate for 1.2s
-                } else if (newTarget > this.targetOffset) {
+                    this.lastBlueScore = data.players.left.score;
+                }
+                if (data.players.right && data.players.right.score > this.lastRedScore) {
                     this.redPullTimer = 1.2;
+                    this.lastRedScore = data.players.right.score;
                 }
             }
             this.targetOffset = newTarget;
@@ -223,6 +228,10 @@ export class TugScene extends Scene {
         this.currentOffset = 0;
         this.targetOffset = 0;
         this.ropeNodes = [];
+        this.lastBlueScore = 0;
+        this.lastRedScore = 0;
+        this.bluePullTimer = 0;
+        this.redPullTimer = 0;
     }
 
     onGameOver(data) {
