@@ -58,9 +58,10 @@ export class TugScene extends Scene {
         const { width, height } = this.scale;
 
         // 1. Epic Fantasy Background (Wall)
-        // Adjust the height proportion so the floor takes up the bottom 25-30%
-        const wallHeight = height * 0.8;
-        this.wall = this.add.tileSprite(0, 0, width, wallHeight, 'wall_stone');
+        // Set an exact split between wall and floor to fix perspective
+        const floorSplit = height * 0.65; // Floor starts at 65% down
+        
+        this.wall = this.add.tileSprite(0, 0, width, floorSplit, 'wall_stone');
         this.wall.setOrigin(0, 0);
         // We'll scale the pixel art texture slightly so it's not tiny
         this.wall.tileScaleX = 2;
@@ -68,9 +69,8 @@ export class TugScene extends Scene {
         this.wall.setTint(0x888888); // Moody dungeon lighting
         
         // 2. Fantasy Floor (Dirt)
-        const floorHeight = height * 0.4;
-        const floorY = height - floorHeight;
-        this.floor = this.add.tileSprite(0, floorY, width, floorHeight, 'floor_dirt');
+        const floorHeight = height - floorSplit;
+        this.floor = this.add.tileSprite(0, floorSplit, width, floorHeight, 'floor_dirt');
         this.floor.setOrigin(0, 0);
         this.floor.tileScaleX = 2.5;
         this.floor.tileScaleY = 2.5;
@@ -90,9 +90,15 @@ export class TugScene extends Scene {
         const vignette = this.add.graphics();
         vignette.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0.7, 0.7, 0, 0);
         vignette.fillRect(0, 0, width, height * 0.2); // Top shadow
+
         const vignetteBottom = this.add.graphics();
         vignetteBottom.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0, 0, 0.8, 0.8);
         vignetteBottom.fillRect(0, height * 0.8, width, height * 0.2); // Bottom shadow
+        
+        // Add a shadow directly on the seam between wall and floor to ground it
+        const seamShadow = this.add.graphics();
+        seamShadow.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0.6, 0.6, 0, 0);
+        seamShadow.fillRect(0, floorSplit, width, height * 0.05);
 
         this.bgGfx = this.add.graphics();
         this.ropeGfx = this.add.graphics();
@@ -132,8 +138,7 @@ export class TugScene extends Scene {
         const groundY = height * 0.88; // low so it sweeps perfectly under feet
 
         // Paint a dark shadow blob underneath them instead of bright ellipse
-        this.bgGfx.fillStyle(0x000000, 0.4); 
-        this.bgGfx.fillEllipse(cx, groundY, groundWidth, groundHeight);
+        // Removed giant shadow blob to replace with individual character foot shadows
         
         // Draw an epic glowing marker line down the center wall/floor
         this.bgGfx.lineStyle(4, 0xD4B65A, 0.8); // Glowing golden rope color
@@ -152,6 +157,8 @@ export class TugScene extends Scene {
         const cPrefix = isRed ? 'red' : 'blue';
         const cPrefixCap = isRed ? 'Red' : 'Blue';
         
+        const shadow = this.add.ellipse(-35, 125, 90, 20, 0x000000, 0.4);
+
         // Origins adjusted so rotation happens at joints
         const backArm = this.add.image(-20, -10, cPrefix + 'Arm_long').setScale(scale).setTint(0xcccccc).setOrigin(0.5, 0.2);
         backArm.setName('backArm');
@@ -163,7 +170,7 @@ export class TugScene extends Scene {
         const backLeg = this.add.image(-20, 40, 'pants' + cPrefixCap + '_long').setScale(scale).setTint(0xcccccc).setOrigin(0.5, 0.1);
         backLeg.setName('backLeg');
         const backShoe = this.add.image(-25, 110, cPrefix + 'Shoe1').setScale(scale * 0.8).setTint(0xcccccc);
-        backShoe.scaleX = (scale * 0.8); // Fixed to face natural forward direction
+        backShoe.scaleX = -(scale * 0.8); // Rotated 180 degrees per user request
         backShoe.setName('backShoe');
         
         const torso = this.add.image(-40, 0, cPrefix + 'Shirt1').setScale(scale);
@@ -174,7 +181,7 @@ export class TugScene extends Scene {
         const frontLeg = this.add.image(-40, 40, 'pants' + cPrefixCap + '_long').setScale(scale).setOrigin(0.5, 0.1);
         frontLeg.setName('frontLeg');
         const frontShoe = this.add.image(-45, 110, cPrefix + 'Shoe1').setScale(scale * 0.8);
-        frontShoe.scaleX = (scale * 0.8); // Fixed to face natural forward direction
+        frontShoe.scaleX = -(scale * 0.8); // Rotated 180 degrees per user request
         frontShoe.setName('frontShoe');
         
         const frontArm = this.add.image(-25, -15, cPrefix + 'Arm_long').setScale(scale).setOrigin(0.5, 0.2);
@@ -184,7 +191,7 @@ export class TugScene extends Scene {
         const frontHand = this.add.image(0, 0, 'tint1_hand').setScale(scale * 0.8);
         frontHand.setName('frontHand');
 
-        cont.add([backArm, backHand, backLeg, backShoe, torso, head, face, frontLeg, frontShoe, frontArm, frontHand]);
+        cont.add([shadow, backArm, backHand, backLeg, backShoe, torso, head, face, frontLeg, frontShoe, frontArm, frontHand]);
         
         // Initial setup
         if (isRed) cont.scaleX = -1;
