@@ -183,7 +183,7 @@ export class TugScene extends Scene {
         const frontLeg = this.add.image(-40, 40, 'pants' + cPrefixCap + '_long').setScale(scale).setOrigin(0.5, 0.1);
         frontLeg.setName('frontLeg');
         const frontShoe = this.add.image(-45, 110, cPrefix + 'Shoe1')
-            .setScale(scale * 0.8);
+            .setScale(scale * 0.8);;
         frontShoe.setName('frontShoe');
         
         const frontArm = this.add.image(-25, -15, cPrefix + 'Arm_long').setScale(scale).setOrigin(0.5, 0.2);
@@ -320,9 +320,10 @@ export class TugScene extends Scene {
             if (backLeg) backLeg.rotation = -0.1 + (Math.cos(time + 1) * 0.15) * pullAmt;
 
             // Counteract container rotation so feet and shadow stay flat on the ground
-            if (frontShoe) frontShoe.rotation = -member.rotation;
-            if (backShoe) backShoe.rotation = -member.rotation;
-            if (shadow) shadow.rotation = -member.rotation;
+            const flipMult = member.scaleX < 0 ? -1 : 1;
+            if (frontShoe) frontShoe.rotation = -member.rotation * flipMult;
+            if (backShoe) backShoe.rotation = -member.rotation * flipMult;
+            if (shadow) shadow.rotation = -member.rotation * flipMult;
 
             // Hands shifting slightly with arm rotation
             if (frontHand) {
