@@ -22,7 +22,7 @@ const DIFFICULTIES = [
     { key: 3, label: 'Hard', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Hard"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>, desc: 'Multiply 2-12' },
 ];
 
-export default function SetupWizard({ onStartGame }) {
+export default function SetupWizard({ mode = 'local', onStartGame, onBack }) {
     const [step, setStep] = useState(1);
     const [selectedOps, setSelectedOps] = useState(['add']);
     const [difficulty, setDifficulty] = useState(1);
@@ -182,28 +182,32 @@ export default function SetupWizard({ onStartGame }) {
                                     />
                                 </div>
 
-                                <span style={{ fontWeight: 900, color: 'var(--blue)', fontSize: '1.5rem', margin: '0 auto' }}>VS</span>
+                                {mode === 'local' && (
+                                    <>
+                                        <span style={{ fontWeight: 900, color: 'var(--blue)', fontSize: '1.5rem', margin: '0 auto' }}>VS</span>
 
-                                {/* Team 2 Red */}
-                                <div className="team-input-box" style={{
-                                    flex: '1 1 min(100%, 200px)', border: '2px solid var(--red)', borderRadius: '12px',
-                                    padding: '20px', textAlign: 'center',
-                                }}>
-                                    <div style={{ color: 'var(--red)', marginBottom: '6px', display: 'flex', justifyContent: 'center' }}>
-                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Team 2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                                    </div>
-                                    <div style={{ fontWeight: 800, color: 'var(--red)', marginBottom: '12px', fontSize: '0.95rem' }}>
-                                        TEAM 2 (RED)
-                                    </div>
-                                    <input
-                                        type="text"
-                                        placeholder="Team name"
-                                        className="answer-input"
-                                        value={teamNames.right}
-                                        onChange={(e) => setTeamNames((t) => ({ ...t, right: e.target.value }))}
-                                        style={{ fontSize: '1rem', fontWeight: 600, pointerEvents: 'auto', userSelect: 'text', width: '100%', boxSizing: 'border-box' }}
-                                    />
-                                </div>
+                                        {/* Team 2 Red */}
+                                        <div className="team-input-box" style={{
+                                            flex: '1 1 min(100%, 200px)', border: '2px solid var(--red)', borderRadius: '12px',
+                                            padding: '20px', textAlign: 'center',
+                                        }}>
+                                            <div style={{ color: 'var(--red)', marginBottom: '6px', display: 'flex', justifyContent: 'center' }}>
+                                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Team 2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                            </div>
+                                            <div style={{ fontWeight: 800, color: 'var(--red)', marginBottom: '12px', fontSize: '0.95rem' }}>
+                                                TEAM 2 (RED)
+                                            </div>
+                                            <input
+                                                type="text"
+                                                placeholder="Team name"
+                                                className="answer-input"
+                                                value={teamNames.right}
+                                                onChange={(e) => setTeamNames((t) => ({ ...t, right: e.target.value }))}
+                                                style={{ fontSize: '1rem', fontWeight: 600, pointerEvents: 'auto', userSelect: 'text', width: '100%', boxSizing: 'border-box' }}
+                                            />
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     )}

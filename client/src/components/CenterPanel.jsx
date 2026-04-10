@@ -21,6 +21,7 @@ export default function CenterPanel({
     return (
         <div style={{
             flex: 1.2,
+            alignSelf: 'stretch',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',

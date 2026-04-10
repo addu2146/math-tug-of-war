@@ -8,7 +8,9 @@ import { EventBus } from '../game/EventBus.js';
 import { GAME_EVENTS } from '../utils/constants.js';
 
 const initialState = {
-    phase: 'setup', // setup | playing | gameOver
+    phase: 'setup', // setup | waiting | playing | gameOver
+    roomId: null,
+    role: 'local', // local | left | right
     teamNames: { left: 'Team 1', right: 'Team 2' },
     timeRemaining: 120,
     progress: 0,
@@ -30,6 +32,29 @@ const initialState = {
 
 function gameReducer(state, action) {
     switch (action.type) {
+        case 'ROOM_CREATED':
+            return {
+                ...state,
+                phase: 'waiting',
+                roomId: action.payload.roomId,
+                role: 'left',
+            };
+            
+        case 'ROOM_JOINED':
+            return {
+                ...state,
+                roomId: action.payload.roomId,
+                role: 'right',
+            };
+
+        case 'ROOM_ERROR':
+            alert('Room Error: ' + action.payload.message);
+            return {
+                ...state,
+                phase: 'setup',
+                roomId: null,
+            };
+
         case 'GAME_START':
             return {
                 ...state,
@@ -87,6 +112,14 @@ function gameReducer(state, action) {
                 winReason: action.payload.reason,
                 players: action.payload.players,
                 teamNames: action.payload.teamNames || state.teamNames,
+            };
+
+        case 'OPPONENT_DISCONNECTED':
+            return {
+                ...state,
+                phase: 'gameOver',
+                winner: state.role, // If left, left wins; if right, right wins.
+                winReason: 'opponent_disconnected',
             };
 
         case 'RESET':

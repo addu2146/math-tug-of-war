@@ -13,29 +13,64 @@ import PlayerPanel from './PlayerPanel.jsx';
 import CenterPanel from './CenterPanel.jsx';
 import Countdown from './Countdown.jsx';
 import VictoryModal from './VictoryModal.jsx';
+import WaitingRoom from './WaitingRoom.jsx';
+import ModeSelector from './ModeSelector.jsx';
 import PhaserGame from '../game/PhaserGame.jsx';
 import { useWebSocket } from '../hooks/useWebSocket.js';
 import { useGameState } from '../hooks/useGameState.js';
 import { gameMusic } from '../audio/GameMusic.js';
 
-export default function GameLayout({ onBackToMenu }) {
+export default function GameLayout({ mode, roomToJoin, onSelectMode, onBackToMenu }) {
     const phaserRef = useRef(null);
     const { state, handleServerMessage, clearAnswerResult, resetState } = useGameState();
     const { sendMessage, isConnected } = useWebSocket(handleServerMessage);
     const [showCountdown, setShowCountdown] = useState(false);
     const [gameConfig, setGameConfig] = useState(null);
+    // Flag to ensure we only send auto-join once
+    const [hasJoined, setHasJoined] = useState(false);
+    // Prevent infinite loop by tracking if the countdown was already triggered
+    const [hasPlayedCountdown, setHasPlayedCountdown] = useState(false);
 
-    // Handle setup wizard completion — start countdown
+    useEffect(() => {
+        if (mode === 'join' && roomToJoin && isConnected && !hasJoined) {
+            sendMessage('JOIN_ROOM', { payload: { roomId: roomToJoin } });
+            setHasJoined(true);
+        }
+    }, [mode, roomToJoin, isConnected, hasJoined, sendMessage]);
+
+    // Handle setup wizard completion — start game/creation
     const handleStartGame = useCallback((config) => {
         // Initialize audio on user gesture (required by browsers)
         gameMusic.init();
         setGameConfig(config);
-        setShowCountdown(true);
-    }, []);
+        
+        if (mode === 'host') {
+            sendMessage('CREATE_ROOM', { payload: config });
+        } else {
+            setShowCountdown(true);
+            setHasPlayedCountdown(true);
+        }
+    }, [mode, sendMessage]);
+
+    // Auto-RECONNECT logic if socket drops in the middle of a requested network game
+    useEffect(() => {
+        if (mode !== 'local' && state.phase === 'playing' && isConnected && state.roomId && state.role) {
+            sendMessage('RECONNECT', { payload: { roomId: state.roomId, role: state.role } });
+        }
+    }, [isConnected, mode, state.phase, state.roomId, state.role, sendMessage]);
+
+    // If we transition to playing and haven't shown countdown
+    useEffect(() => {
+        if (state.phase === 'playing' && mode !== 'local' && !hasPlayedCountdown) {
+            gameMusic.init();
+            setShowCountdown(true);
+            setHasPlayedCountdown(true);
+        }
+    }, [state.phase, mode, hasPlayedCountdown]);
 
     // Load and play the setup music the second they enter GameLayout
     useEffect(() => {
-        if (state.phase === 'setup') {
+        if (state.phase === 'setup' || state.phase === 'waiting') {
             gameMusic.startSetupMusic();
         }
     }, [state.phase]);
@@ -43,11 +78,13 @@ export default function GameLayout({ onBackToMenu }) {
     // After countdown, start the game via WebSocket and switch to gameplay music
     const handleCountdownComplete = useCallback(() => {
         setShowCountdown(false);
-        sendMessage('SETUP_GAME', { payload: gameConfig });
+        if (mode === 'local') {
+            sendMessage('SETUP_GAME', { payload: gameConfig });
+        }
         
         // Stops Beethoven, starts urgent synth background music
         gameMusic.start();
-    }, [sendMessage, gameConfig]);
+    }, [mode, sendMessage, gameConfig]);
 
     // Handle answer submission from a player panel
     const handleSubmitAnswer = useCallback((side, answer) => {
@@ -75,6 +112,7 @@ export default function GameLayout({ onBackToMenu }) {
     const handlePlayAgain = useCallback(() => {
         resetState();
         setGameConfig(null);
+        setHasPlayedCountdown(false);
     }, [resetState]);
 
     // Handle team-specific rage quit (forfeits the match)
@@ -87,6 +125,8 @@ export default function GameLayout({ onBackToMenu }) {
         gameMusic.stop();
         resetState();
         setGameConfig(null);
+        setHasJoined(false);
+        setHasPlayedCountdown(false);
         if (onBackToMenu) onBackToMenu();
     }, [resetState, onBackToMenu]);
 
@@ -95,8 +135,24 @@ export default function GameLayout({ onBackToMenu }) {
         return () => { gameMusic.destroy(); };
     }, []);
 
+    // Show mode selection if not chosen yet
+    if (!mode) {
+        return <ModeSelector onSelectMode={onSelectMode} onBack={onBackToMenu} />;
+    }
+
     // Show setup wizard
     if (state.phase === 'setup' && !showCountdown) {
+        if (mode === 'join') {
+            return (
+                <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <GameHeader onBack={onBackToMenu} />
+                    <div style={{ margin: 'auto', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                        Connecting to Room {roomToJoin}...
+                    </div>
+                </div>
+            );
+        }
+
         return (
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <GameHeader onBack={onBackToMenu} />
@@ -116,7 +172,17 @@ export default function GameLayout({ onBackToMenu }) {
                         Connecting to server...
                     </div>
                 )}
-                <SetupWizard onStartGame={handleStartGame} />
+                <SetupWizard mode={mode} onStartGame={handleStartGame} />
+            </div>
+        );
+    }
+
+    // Show waiting room
+    if (state.phase === 'waiting' && mode === 'host') {
+        return (
+            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <GameHeader onBack={handleExitToMenu} />
+                <WaitingRoom roomCode={state.roomId} />
             </div>
         );
     }
@@ -175,11 +241,20 @@ export default function GameLayout({ onBackToMenu }) {
                     gap: '12px',
                     padding: '12px',
                     overflow: 'hidden',
-                    alignItems: 'stretch',
+                    alignItems: 'center', // Centers panels vertically instead of stretching
+                    justifyContent: 'center',
                     minHeight: 0,
                 }}>
                     {/* Left Player Panel (Blue) */}
-                    <div style={{ pointerEvents: 'auto', display: 'flex', flex: 1, maxWidth: '320px' }}>
+                    <div style={{ 
+                        pointerEvents: (mode === 'local' || state.role === 'left') ? 'auto' : 'none', 
+                        opacity: (mode === 'local' || state.role === 'left') ? 1 : 0.6,
+                        display: 'flex', 
+                        flex: 1, 
+                        maxWidth: '320px',
+                        height: '100%',
+                        maxHeight: '650px', // Prevent vertical stretching 
+                    }}>
                         <PlayerPanel
                             side="left"
                             problem={state.problems.left}
@@ -204,7 +279,15 @@ export default function GameLayout({ onBackToMenu }) {
                     />
 
                     {/* Right Player Panel (Red) */}
-                    <div style={{ pointerEvents: 'auto', display: 'flex', flex: 1, maxWidth: '320px' }}>
+                    <div style={{ 
+                        pointerEvents: (mode === 'local' || state.role === 'right') ? 'auto' : 'none', 
+                        opacity: (mode === 'local' || state.role === 'right') ? 1 : 0.6,
+                        display: 'flex', 
+                        flex: 1, 
+                        maxWidth: '320px',
+                        height: '100%',
+                        maxHeight: '650px', // Prevent vertical stretching 
+                    }}>
                         <PlayerPanel
                             side="right"
                             problem={state.problems.right}
@@ -226,6 +309,7 @@ export default function GameLayout({ onBackToMenu }) {
                 <div style={{ position: 'relative', zIndex: 10, pointerEvents: 'auto' }}>
                     <VictoryModal
                         winner={state.winner}
+                        winReason={state.winReason}
                         players={state.players}
                         teamNames={state.teamNames}
                         onPlayAgain={handlePlayAgain}

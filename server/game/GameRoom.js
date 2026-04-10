@@ -14,9 +14,10 @@ const TICK_INTERVAL = 1000 / TICK_RATE;
 const GAME_DURATION = 120; // seconds
 
 export class GameRoom {
-    constructor(ws, config = {}) {
-        this.ws = ws;
-        this.rope = new RopePhysics();
+    constructor(id, config = {}) {
+        this.id = id;
+        this.isNetwork = config.isNetwork || false;
+        
         this.tickInterval = null;
         this.timerInterval = null;
         this.gameActive = false;
@@ -42,15 +43,47 @@ export class GameRoom {
         this.timeRemaining = this.gameDuration;
 
         this.players = {
-            left: { score: 0, streak: 0, problem: null, choices: [], inputValue: '' },
-            right: { score: 0, streak: 0, problem: null, choices: [], inputValue: '' },
+            left: { ws: null, score: 0, streak: 0, problem: null, choices: [], inputValue: '' },
+            right: { ws: null, score: 0, streak: 0, problem: null, choices: [], inputValue: '' },
         };
+        
+        this.rope = new RopePhysics();
+    }
+
+    addPlayer(ws, role) {
+        if (role === 'local') {
+            this.players.left.ws = ws;
+            this.players.right.ws = ws;
+        } else if (role === 'left' || role === 'right') {
+            this.players[role].ws = ws;
+        }
+    }
+
+    removePlayerByWs(ws) {
+        if (this.players.left.ws === ws) this.players.left.ws = null;
+        if (this.players.right.ws === ws) this.players.right.ws = null;
+    }
+
+    get isFull() {
+        if (this.isNetwork) {
+            return this.players.left.ws !== null && this.players.right.ws !== null;
+        }
+        return this.players.left.ws !== null;
     }
 
     send(data) {
-        if (this.ws.readyState === this.ws.OPEN) {
-            this.ws.send(JSON.stringify(data));
-        }
+        const payload = JSON.stringify(data);
+        const sentTo = new Set();
+        
+        const trySend = (ws) => {
+            if (ws && ws.readyState === 1 && !sentTo.has(ws)) {
+                ws.send(payload);
+                sentTo.add(ws);
+            }
+        };
+
+        trySend(this.players.left.ws);
+        trySend(this.players.right.ws);
     }
 
     startGame() {

@@ -4,12 +4,19 @@
 
 import React from 'react';
 
-export default function VictoryModal({ winner, players, teamNames, onPlayAgain, onExit }) {
+export default function VictoryModal({ winner, winReason, players, teamNames, onPlayAgain, onExit }) {
     const isDraw = winner === 'draw';
     const winnerName = isDraw ? 'Draw!' : (winner === 'left' ? teamNames?.left : teamNames?.right);
     const winnerColor = isDraw ? 'var(--gold)' : (winner === 'left' ? 'var(--blue)' : 'var(--red)');
     const leftScore = players?.left?.score || 0;
     const rightScore = players?.right?.score || 0;
+
+    let subText = null;
+    if (winReason === 'opponent_disconnected') {
+        subText = "Opponent disconnected!";
+    } else if (winReason === 'surrender') {
+        subText = "Opponent surrendered!";
+    }
 
     return (
         <div style={{
@@ -43,6 +50,21 @@ export default function VictoryModal({ winner, players, teamNames, onPlayAgain, 
                 }}>
                     {isDraw ? "It's a Draw!" : `${winnerName} Wins!`}
                 </h1>
+
+                {subText && (
+                    <div style={{
+                        fontSize: '1.2rem',
+                        fontWeight: 700,
+                        color: 'var(--text-light)',
+                        marginBottom: '16px',
+                        background: 'rgba(255,255,255,0.1)',
+                        padding: '8px 16px',
+                        borderRadius: '12px',
+                        display: 'inline-block'
+                    }}>
+                        {subText}
+                    </div>
+                )}
 
                 {/* Score summary */}
                 <div style={{
