@@ -8,6 +8,8 @@ export const CLIENT_MESSAGES = {
     ANSWER_SUBMITTED: 'ANSWER_SUBMITTED',
     PLAYER_READY: 'PLAYER_READY',
     RAGE_QUIT: 'RAGE_QUIT',
+    SETUP_GAME: 'SETUP_GAME',
+    PLAY_AGAIN: 'PLAY_AGAIN',
 };
 
 // Server → Client (authoritative state broadcasts)

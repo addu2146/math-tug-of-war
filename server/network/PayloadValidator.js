@@ -42,6 +42,12 @@ export function validateClientPayload(rawMessage) {
             }
             sanitized.answer = payload.answer;
             sanitized.problemId = typeof payload.problemId === 'string' ? payload.problemId : '';
+        } else if (payload.type === CLIENT_MESSAGES.SETUP_GAME || payload.type === CLIENT_MESSAGES.PLAY_AGAIN) {
+            if (payload.payload && typeof payload.payload === 'object') {
+                sanitized.payload = payload.payload;
+            } else {
+                sanitized.payload = {};
+            }
         }
 
         return { isValid: true, data: sanitized };

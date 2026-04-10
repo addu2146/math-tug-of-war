@@ -20,10 +20,25 @@ export class GameRoom {
         this.tickInterval = null;
         this.timerInterval = null;
         this.gameActive = false;
-        this.difficulty = config.difficulty || 1;
-        this.operations = config.operations || ['add'];
-        this.teamNames = config.teamNames || { left: 'Team 1', right: 'Team 2' };
-        this.gameDuration = config.duration || GAME_DURATION;
+        
+        // Sanitize configuration inputs
+        this.difficulty = Number(config.difficulty) || 1;
+        if (this.difficulty < 1 || this.difficulty > 3) this.difficulty = 1;
+        
+        this.operations = Array.isArray(config.operations) && config.operations.length > 0 
+            ? config.operations.filter(op => typeof op === 'string').slice(0, 10) 
+            : ['add'];
+            
+        // Prevent extremely long room/team names (DoS / UI Breakage)
+        this.teamNames = {
+            left: (config.teamNames?.left || 'Team 1').toString().substring(0, 30),
+            right: (config.teamNames?.right || 'Team 2').toString().substring(0, 30)
+        };
+        
+        // Prevent infinite or extremely long games
+        this.gameDuration = Number(config.duration) || GAME_DURATION;
+        if (this.gameDuration < 10 || this.gameDuration > 600) this.gameDuration = GAME_DURATION;
+        
         this.timeRemaining = this.gameDuration;
 
         this.players = {

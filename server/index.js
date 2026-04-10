@@ -14,6 +14,7 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { GameRoom } from './game/GameRoom.js';
+import { validateClientPayload } from './network/PayloadValidator.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3001;
@@ -42,41 +43,74 @@ wss.on('connection', (ws) => {
 
     ws.on('message', (rawMessage) => {
         try {
-            const msg = JSON.parse(rawMessage.toString());
+            const rawString = rawMessage.toString();
+            
+            // Limit payload size to prevent DoS
+            if (rawString.length > 5120) {
+                console.warn('[Server] Payload Too Large');
+                return ws.close(1009, 'Payload Too Large');
+            }
 
-            switch (msg.type) {
+            // Parse to get root attributes like side and raw payload
+            let parsed;
+            try {
+                parsed = JSON.parse(rawString);
+            } catch {
+                console.warn('[Server] Error parsing raw JSON');
+                return;
+            }
+
+            // Validate that side is either 'left' or 'right'
+            if (parsed.side && parsed.side !== 'left' && parsed.side !== 'right') {
+                console.warn('[Server] Invalid side:', parsed.side);
+                return;
+            }
+
+            // Use the strict Payload Validator for the inner event payload 
+            // Note: Our setup expects parsed.type vs payload.type so let's sanitize manually or adapt validator
+            // We pass rawString to validator to verify it acts on correct intent names
+            const { isValid, data, error } = validateClientPayload(rawString);
+
+            if (!isValid) {
+                console.warn('[Server] Payload validation error:', error);
+                return; 
+            }
+
+            const msgType = data.type;
+
+            switch (msgType) {
                 case 'SETUP_GAME': {
                     // Create a new room with the game config from the setup wizard
-                    room = new GameRoom(ws, msg.payload || {});
+                    room = new GameRoom(ws, data.payload || {});
                     rooms.set(ws, room);
                     room.startGame();
-                    console.log('[Server] Game started with config:', msg.payload);
+                    console.log('[Server] Game started with config:', data.payload);
                     break;
                 }
 
                 case 'ANSWER_SUBMITTED': {
                     if (room) {
-                        room.handleAnswer(msg.side, msg.answer);
+                        room.handleAnswer(parsed.side, data.answer);
                     }
                     break;
                 }
 
                 case 'RAGE_QUIT': {
                     if (room) {
-                        room.handleRageQuit(msg.side);
+                        room.handleRageQuit(parsed.side);
                     }
                     break;
                 }
 
                 case 'PLAY_AGAIN': {
                     if (room) {
-                        room.resetAndRestart(msg.payload || {});
+                        room.resetAndRestart(data.payload || {});
                     }
                     break;
                 }
 
                 default:
-                    console.warn('[Server] Unknown message type:', msg.type);
+                    console.warn('[Server] Unknown message type:', msgType);
             }
         } catch (err) {
             console.error('[Server] Error parsing message:', err.message);
