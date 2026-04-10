@@ -146,6 +146,22 @@ export default function GameLayout({ mode, roomToJoin, onSelectMode, onBackToMen
             return (
                 <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                     <GameHeader onBack={onBackToMenu} />
+                    {!isConnected && (
+                        <div style={{
+                            background: 'var(--red)',
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                            padding: '8px',
+                            fontWeight: 700,
+                            fontSize: '0.9rem',
+                        }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Warning"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                            Connecting to server...
+                        </div>
+                    )}
                     <div style={{ margin: 'auto', fontSize: '1.5rem', fontWeight: 'bold' }}>
                         Connecting to Room {roomToJoin}...
                     </div>

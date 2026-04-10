@@ -2,10 +2,13 @@
  * Shared constants between React UI and game logic.
  */
 
-// WebSocket connection — auto-detect host for production
+// WebSocket connection — auto-detect host for production, but use port 3001 if we're on the Vite dev port (5173)
 const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-export const WS_URL = window.location.hostname === 'localhost'
-    ? 'ws://localhost:3001'
+const hostname = window.location.hostname;
+const isDev = window.location.port === '5173' || hostname === 'localhost' || hostname === '127.0.0.1';
+
+export const WS_URL = isDev
+    ? `ws://${hostname}:3001`
     : `${wsProtocol}//${window.location.host}`;
 
 // Server message types (mirrors server/network/MessageTypes.js)
