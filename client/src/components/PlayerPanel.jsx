@@ -187,18 +187,13 @@ export default function PlayerPanel({
                 {/* Team Rage Quit / Forfeit Button */}
                 <button
                     onPointerDown={() => { if(onRageQuit && !disabled) onRageQuit(side); }}
-                    className="btn-game animate-pulse"
+                    className="btn-game animate-pulse rage-quit-btn"
                     disabled={disabled}
                     style={{
                         marginTop: 'auto',
                         background: 'transparent',
                         color: 'var(--red)',
                         border: '2px solid var(--red)',
-                        padding: '8px',
-                        borderRadius: '8px',
-                        fontWeight: 800,
-                        fontSize: '0.8rem',
-                        textTransform: 'uppercase',
                         display: disabled ? 'none' : 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',

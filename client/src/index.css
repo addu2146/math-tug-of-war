@@ -248,6 +248,21 @@ body,
     padding: 4px 16px !important;
     margin-top: 4px !important;
   }
+
+  .rage-quit-btn {
+    padding: 2px 6px !important;
+    font-size: 0.65rem !important;
+    min-height: 22px !important;
+    min-width: 60px !important;
+    border-radius: 4px !important;
+    border-width: 1px !important;
+    gap: 2px !important;
+  }
+  
+  .rage-quit-btn svg {
+    width: 10px !important;
+    height: 10px !important;
+  }
 }
 
 @keyframes pop-in {
@@ -678,5 +693,15 @@ body,
 .streak-indicator {
   animation: fire-pulse 0.8s infinite ease-in-out;
   text-shadow: 0 2px 4px rgba(255, 165, 0, 0.4);
+}
+
+.rage-quit-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  min-height: 32px;
+  min-width: 80px;
 }
 
