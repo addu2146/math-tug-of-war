@@ -141,12 +141,23 @@ export default function LandingPage({ onSelectGame }) {
                         style={{ animationDelay: '0.1s', animationFillMode: 'both', padding: 'clamp(24px, 5vw, 40px) 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', boxShadow: 'var(--card-shadow)' }}
                         onPointerDown={() => onSelectGame('tug-of-war')}
                     >
-                        <div style={{ width: 'clamp(72px, 8vw, 96px)', height: 'clamp(72px, 8vw, 96px)', borderRadius: '24px', background: 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: 'var(--blue)' }}>
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Math Game">
-                                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M10 10h4"/><path d="M12 8v4"/><path d="M10 16h4"/>
+                        <div style={{ width: 'clamp(72px, 8vw, 96px)', height: 'clamp(72px, 8vw, 96px)', borderRadius: '24px', background: 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: 'var(--blue)', position: 'relative' }}>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Math Masti Zone">
+                                <rect x="2" y="6" width="20" height="12" rx="2" />
+                                <path d="M6 12h4" />
+                                <path d="M8 10v4" />
+                                <circle cx="15" cy="13" r="1" fill="currentColor" />
+                                <circle cx="18" cy="11" r="1" fill="currentColor" />
+                            </svg>
+                            {/* Math sparks */}
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="3" strokeLinecap="round" style={{ position: 'absolute', top: '-6px', right: '-6px', transform: 'rotate(15deg)' }}>
+                                <path d="M12 4v16M4 12h16" />
+                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="3" strokeLinecap="round" style={{ position: 'absolute', bottom: '-4px', left: '-8px', transform: 'rotate(-10deg)' }}>
+                                <path d="M4 20L20 4M4 4l16 16" />
                             </svg>
                         </div>
-                        <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.75rem)', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px' }}>Math 🆚 War</h2>
+                        <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.75rem)', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px' }}>Math Masti Zone</h2>
                         <p style={{ fontSize: 'clamp(0.95rem, 1.5vw, 1.05rem)', color: 'var(--text-light)', lineHeight: 1.5, marginBottom: '24px', flex: 1 }}>
                             Compete in real-time arithmetic battles! Correctly solve equations to pull the rope to your side.
                         </p>

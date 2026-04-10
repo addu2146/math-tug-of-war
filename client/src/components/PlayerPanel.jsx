@@ -95,19 +95,51 @@ export default function PlayerPanel({
                     color: 'white',
                     fontWeight: 800,
                     fontSize: '1rem',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '120px'
                 }}>
                     {teamName || (isLeft ? 'Team 1' : 'Team 2')}
                 </span>
-                <span style={{
-                    background: 'rgba(255,255,255,0.25)',
-                    color: 'white',
-                    padding: '2px 14px',
-                    borderRadius: '12px',
-                    fontWeight: 800,
-                    fontSize: '1rem',
-                }}>
-                    {score}
-                </span>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {streak > 1 && (
+                        <div className="streak-indicator" style={{
+                            color: streak >= 6 ? '#00e5ff' : streak >= 4 ? '#ffea00' : '#ffd700',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontWeight: 900,
+                            fontSize: '1rem',
+                        }}>
+                            <svg 
+                                width="18" 
+                                height="18" 
+                                viewBox="0 0 24 24" 
+                                fill="currentColor" 
+                                stroke="none" 
+                                aria-label="Fire"
+                                style={{
+                                    filter: streak >= 6 ? 'drop-shadow(0 0 6px #00e5ff)' : streak >= 4 ? 'drop-shadow(0 0 4px #ffea00)' : 'none',
+                                }}
+                            >
+                                <path d="M17.5 11.5c-1.5-1.5-2.5-4-2-6-3.5 2-4 6-3.5 8 0 0-2-1.5-2-4-2.5 2.5-4 7-2 10.5 1.5 2.5 4.5 4 7.5 4s6-1.5 7.5-4c2-3.5.5-8-2-10.5-1.5 1-2.5 1.5-3.5 2z" />
+                            </svg>
+                            <span style={{ color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>x{streak}</span>
+                        </div>
+                    )}
+                    <span style={{
+                        background: 'rgba(255,255,255,0.25)',
+                        color: 'white',
+                        padding: '2px 14px',
+                        borderRadius: '12px',
+                        fontWeight: 800,
+                        fontSize: '1rem',
+                    }}>
+                        {score}
+                    </span>
+                </div>
             </div>
 
             {/* Problem + Input + Numpad */}
@@ -121,37 +153,6 @@ export default function PlayerPanel({
                 margin: '0',
                 minHeight: 0,
             }}>
-                {/* Streak indicator - High visibility area */}
-                {streak > 1 && (
-                    <div className="streak-indicator" style={{
-                        textAlign: 'center',
-                        fontSize: '1.8rem',
-                        fontWeight: 900,
-                        color: streak >= 6 ? '#00e5ff' : streak >= 4 ? '#ff3300' : '#ffa500',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        margin: '-4px 0 min(4px, 0.5vh)'
-                    }}>
-                        <svg 
-                            width={streak >= 6 ? "42" : streak >= 4 ? "36" : "30"} 
-                            height={streak >= 6 ? "42" : streak >= 4 ? "36" : "30"} 
-                            viewBox="0 0 24 24" 
-                            fill="currentColor" 
-                            stroke="none" 
-                            aria-label="Fire"
-                            style={{
-                                filter: streak >= 6 ? 'drop-shadow(0 0 8px #00e5ff)' : streak >= 4 ? 'drop-shadow(0 0 6px #ff3300)' : 'none',
-                                transition: 'all 0.3s ease'
-                            }}
-                        >
-                            <path d="M17.5 11.5c-1.5-1.5-2.5-4-2-6-3.5 2-4 6-3.5 8 0 0-2-1.5-2-4-2.5 2.5-4 7-2 10.5 1.5 2.5 4.5 4 7.5 4s6-1.5 7.5-4c2-3.5.5-8-2-10.5-1.5 1-2.5 1.5-3.5 2z" />
-                        </svg>
-                        <span>{streak}</span>
-                    </div>
-                )}
-
                 {/* Math Problem */}
                 <div className={`math-problem ${answerResult === 'incorrect' ? 'animate-shake' : ''}`} style={{
                     textAlign: 'center',
