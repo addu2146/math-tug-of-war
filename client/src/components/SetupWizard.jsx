@@ -103,7 +103,7 @@ export default function SetupWizard({ mode = 'local', onStartGame, onBack }) {
                             <p style={{ textAlign: 'center', color: 'var(--text-light)', marginBottom: '20px', fontSize: '0.95rem' }}>
                                 Select one or more operations
                             </p>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 'clamp(8px, 2vh, 12px)' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(8px, 2vh, 12px)' }}>
                                 {OPERATIONS.map((op) => (
                                     <button
                                         key={op.key}
@@ -160,7 +160,7 @@ export default function SetupWizard({ mode = 'local', onStartGame, onBack }) {
                             <h2 style={{ textAlign: 'center', fontSize: '1.2rem', fontWeight: 700, marginBottom: '20px' }}>
                                 Team Names
                             </h2>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 'min(12px, 2vw)' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'min(12px, 2vw)' }}>
                                 {/* Team 1 Blue */}
                                 <div className="team-input-box" style={{
                                     border: '2px solid var(--blue)', borderRadius: '12px',
