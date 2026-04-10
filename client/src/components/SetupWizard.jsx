@@ -103,24 +103,24 @@ export default function SetupWizard({ mode = 'local', onStartGame, onBack }) {
                             <p style={{ textAlign: 'center', color: 'var(--text-light)', marginBottom: '20px', fontSize: '0.95rem' }}>
                                 Select one or more operations
                             </p>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(8px, 2vh, 12px)' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 'clamp(8px, 2vh, 12px)' }}>
                                 {OPERATIONS.map((op) => (
                                     <button
                                         key={op.key}
-                                        className={`btn-game ${selectedOps.includes(op.key) ? 'btn-outline-selected' : 'btn-ghost-dark'}`}
+                                        className={`btn-game op-button ${selectedOps.includes(op.key) ? 'btn-outline-selected' : 'btn-ghost-dark'}`}
                                         onPointerDown={(e) => { toggleOp(op.key); }}
-                                        style={{ width: '100%', justifyContent: 'flex-start', padding: 'clamp(10px, 2vh, 16px) clamp(16px, 4vw, 24px)', fontSize: 'clamp(1rem, 2.5vw, 1.1rem)' }}
+                                        style={{ width: '100%', justifyContent: 'flex-start', padding: 'clamp(8px, 2vh, 16px) clamp(12px, 4vw, 24px)' }}
                                     >
                                         <span style={{
-                                            width: '40px', height: '40px', borderRadius: '50%',
+                                            width: '32px', height: '32px', borderRadius: '50%',
                                             background: selectedOps.includes(op.key) ? 'var(--blue)' : '#e0e0e0',
                                             color: selectedOps.includes(op.key) ? 'white' : 'var(--text-light)',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontSize: '1.3rem', fontWeight: 900, flexShrink: 0,
+                                            fontSize: '1.1rem', fontWeight: 900, flexShrink: 0,
                                         }}>
                                             {op.icon}
                                         </span>
-                                        <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>{op.label}</span>
+                                        <span style={{ fontSize: '1rem', fontWeight: 700 }}>{op.label}</span>
                                     </button>
                                 ))}
                             </div>
@@ -160,16 +160,16 @@ export default function SetupWizard({ mode = 'local', onStartGame, onBack }) {
                             <h2 style={{ textAlign: 'center', fontSize: '1.2rem', fontWeight: 700, marginBottom: '20px' }}>
                                 Team Names
                             </h2>
-                            <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 'min(12px, 2vw)' }}>
                                 {/* Team 1 Blue */}
                                 <div className="team-input-box" style={{
-                                    flex: '1 1 min(100%, 200px)', border: '2px solid var(--blue)', borderRadius: '12px',
-                                    padding: '20px', textAlign: 'center',
+                                    border: '2px solid var(--blue)', borderRadius: '12px',
+                                    padding: '16px', textAlign: 'center',
                                 }}>
                                     <div style={{ color: 'var(--blue)', marginBottom: '6px', display: 'flex', justifyContent: 'center' }}>
-                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Team 1"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Team 1"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                                     </div>
-                                    <div style={{ fontWeight: 800, color: 'var(--blue)', marginBottom: '12px', fontSize: '0.95rem' }}>
+                                    <div style={{ fontWeight: 800, color: 'var(--blue)', marginBottom: '12px', fontSize: '0.85rem' }}>
                                         TEAM 1 (BLUE)
                                     </div>
                                     <input
@@ -178,35 +178,31 @@ export default function SetupWizard({ mode = 'local', onStartGame, onBack }) {
                                         className="answer-input"
                                         value={teamNames.left}
                                         onChange={(e) => setTeamNames((t) => ({ ...t, left: e.target.value }))}
-                                        style={{ fontSize: '1rem', fontWeight: 600, pointerEvents: 'auto', userSelect: 'text', width: '100%', boxSizing: 'border-box' }}
+                                        style={{ fontSize: '0.95rem', fontWeight: 600, pointerEvents: 'auto', userSelect: 'text', width: '100%', boxSizing: 'border-box', padding: '8px' }}
                                     />
                                 </div>
 
+                                {/* Team 2 Red */}
                                 {mode === 'local' && (
-                                    <>
-                                        <span style={{ fontWeight: 900, color: 'var(--blue)', fontSize: '1.5rem', margin: '0 auto' }}>VS</span>
-
-                                        {/* Team 2 Red */}
-                                        <div className="team-input-box" style={{
-                                            flex: '1 1 min(100%, 200px)', border: '2px solid var(--red)', borderRadius: '12px',
-                                            padding: '20px', textAlign: 'center',
-                                        }}>
-                                            <div style={{ color: 'var(--red)', marginBottom: '6px', display: 'flex', justifyContent: 'center' }}>
-                                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Team 2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                                            </div>
-                                            <div style={{ fontWeight: 800, color: 'var(--red)', marginBottom: '12px', fontSize: '0.95rem' }}>
-                                                TEAM 2 (RED)
-                                            </div>
-                                            <input
-                                                type="text"
-                                                placeholder="Team name"
-                                                className="answer-input"
-                                                value={teamNames.right}
-                                                onChange={(e) => setTeamNames((t) => ({ ...t, right: e.target.value }))}
-                                                style={{ fontSize: '1rem', fontWeight: 600, pointerEvents: 'auto', userSelect: 'text', width: '100%', boxSizing: 'border-box' }}
-                                            />
+                                    <div className="team-input-box" style={{
+                                        border: '2px solid var(--red)', borderRadius: '12px',
+                                        padding: '16px', textAlign: 'center',
+                                    }}>
+                                        <div style={{ color: 'var(--red)', marginBottom: '6px', display: 'flex', justifyContent: 'center' }}>
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Team 2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                                         </div>
-                                    </>
+                                        <div style={{ fontWeight: 800, color: 'var(--red)', marginBottom: '12px', fontSize: '0.85rem' }}>
+                                            TEAM 2 (RED)
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Team name"
+                                            className="answer-input"
+                                            value={teamNames.right}
+                                            onChange={(e) => setTeamNames((t) => ({ ...t, right: e.target.value }))}
+                                            style={{ fontSize: '0.95rem', fontWeight: 600, pointerEvents: 'auto', userSelect: 'text', width: '100%', boxSizing: 'border-box', padding: '8px' }}
+                                        />
+                                    </div>
                                 )}
                             </div>
                         </div>

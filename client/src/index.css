@@ -263,6 +263,47 @@ body,
     width: 10px !important;
     height: 10px !important;
   }
+
+  /* Reduce SetupWizard empty spaces for phones */
+  .setup-wrapper {
+    padding: 8px !important;
+  }
+  
+  .wizard-card {
+    padding: 12px 16px !important;
+  }
+  
+  .setup-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 8px !important;
+  }
+
+  .step-content {
+    margin-top: 12px !important;
+    gap: 8px !important;
+  }
+
+  .step-content h2 {
+    font-size: 1.1rem !important;
+    margin-bottom: 4px !important;
+  }
+
+  .step-content p {
+    font-size: 0.85rem !important;
+    margin-bottom: 12px !important;
+  }
+
+  .team-input-box {
+    padding: 12px !important;
+  }
+
+  .op-button {
+    padding: 8px 12px !important;
+  }
+
+  .op-button span {
+    font-size: 0.95rem !important;
+  }
 }
 
 @keyframes pop-in {
