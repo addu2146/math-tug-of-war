@@ -57,14 +57,14 @@ body,
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 48px;
-  min-width: 48px; /* Touch target minimum */
-  padding: 10px 20px;
+  min-height: 36px;
+  min-width: 36px; /* Touch target minimum */
+  padding: 8px 16px;
   border: none;
   border-radius: 12px;
   font-family: var(--font-primary);
   font-weight: 800;
-  font-size: 1rem;
+  font-size: clamp(0.8rem, 2vh, 1rem);
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -209,6 +209,44 @@ body,
 
   100% {
     background-color: white;
+  }
+}
+
+/* === Mobile Device Enhancements === */
+@media (max-width: 768px) {
+  .game-header-title {
+    font-size: 1rem !important;
+  }
+  
+  .game-header-title svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .player-panel-header {
+    padding: 6px 10px !important;
+  }
+}
+
+@media (max-height: 480px) {
+  .btn-game {
+    min-height: 36px;
+    min-width: 36px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  .game-header-title {
+    font-size: 0.9rem !important;
+  }
+  
+  .game-header {
+    padding: 4px 12px !important;
+  }
+
+  .score-header-pill {
+    padding: 4px 16px !important;
+    margin-top: 4px !important;
   }
 }
 
@@ -505,6 +543,14 @@ body,
     font-size: 0.95rem !important;
     padding: 4px !important;
     max-height: 28px !important;
+  }
+
+  .btn-game {
+    min-height: 28px !important;
+    min-width: 28px !important;
+    padding: 4px 8px !important;
+    font-size: 0.85rem !important;
+    border-radius: 6px !important;
   }
 
   .numpad-btn {

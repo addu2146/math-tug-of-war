@@ -48,9 +48,9 @@ export function validateClientPayload(rawMessage) {
             } else {
                 sanitized.payload = {};
             }
-        } else if (payload.type === CLIENT_MESSAGES.JOIN_ROOM) {
+        } else if (payload.type === CLIENT_MESSAGES.JOIN_ROOM || payload.type === CLIENT_MESSAGES.RECONNECT) {
             if (typeof payload.payload !== 'object' || typeof payload.payload.roomId !== 'string') {
-                return { isValid: false, error: 'JOIN_ROOM requires a payload object with a "roomId" string' };
+                return { isValid: false, error: `${payload.type} requires a payload object with a "roomId" string` };
             }
             sanitized.payload = payload.payload;
         }

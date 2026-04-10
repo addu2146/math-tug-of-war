@@ -6,10 +6,16 @@ import LandingPage from './components/LandingPage.jsx';
 const enterFullscreen = () => {
     try {
         const doc = document.documentElement;
-        if (!document.fullscreenElement && doc.requestFullscreen) {
-            doc.requestFullscreen().catch(err => console.warn(err));
-        } else if (!document.fullscreenElement && doc.webkitRequestFullscreen) {
-            doc.webkitRequestFullscreen().catch(err => console.warn(err));
+        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+            if (doc.requestFullscreen) {
+                doc.requestFullscreen().catch(err => console.warn(err));
+            } else if (doc.webkitRequestFullscreen) {
+                doc.webkitRequestFullscreen().catch(err => console.warn(err));
+            } else if (doc.msRequestFullscreen) {
+                doc.msRequestFullscreen().catch(err => console.warn(err));
+            } else if (doc.mozRequestFullScreen) {
+                doc.mozRequestFullScreen().catch(err => console.warn(err));
+            }
         }
     } catch (e) {}
 };
@@ -37,8 +43,12 @@ export default function App() {
             const enableFS = () => {
                 enterFullscreen();
                 document.removeEventListener('pointerdown', enableFS);
+                document.removeEventListener('touchend', enableFS);
+                document.removeEventListener('click', enableFS);
             };
             document.addEventListener('pointerdown', enableFS);
+            document.addEventListener('touchend', enableFS);
+            document.addEventListener('click', enableFS);
         }
     }, []);
 

@@ -113,10 +113,10 @@ export default function PlayerPanel({
             {/* Problem + Input + Numpad */}
             <div className="player-panel-body" style={{
                 flex: 1,
-                padding: 'min(12px, 1.5vh) min(14px, 1.5vw)',
+                padding: 'min(6px, 1.5vh) min(8px, 1.5vw)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 'min(10px, 1.2vh)',
+                gap: 'min(6px, 1vh)',
                 background: 'transparent',
                 margin: '0',
                 minHeight: 0,

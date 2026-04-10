@@ -254,8 +254,8 @@ export default function GameLayout({ mode, roomToJoin, onSelectMode, onBackToMen
                 <div style={{
                     flex: 1,
                     display: 'flex',
-                    gap: '12px',
-                    padding: '12px',
+                    gap: 'min(12px, 1.5vw)',
+                    padding: 'min(12px, 1.5vh)',
                     overflow: 'hidden',
                     alignItems: 'center', // Centers panels vertically instead of stretching
                     justifyContent: 'center',

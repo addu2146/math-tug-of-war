@@ -28,7 +28,7 @@ export default function CenterPanel({
             pointerEvents: 'none', // Let clicks pass through center background
         }}>
             {/* Score Header - Glassmorphic floating pill */}
-            <div style={{
+            <div className="score-header-pill" style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
