@@ -1,11 +1,40 @@
 import React, { useState } from 'react';
 
-export default function LandingPage({ onSelectGame }) {
-    const [toastMessage, setToastMessage] = useState(null);
+const spellWeaverTexts = ['✨', '🔮', 'Brewing...', 'Magic!', 'Poof!', 'Coming Soon!', 'Keep clicking!'];
+const wordProblemsTexts = ['📚', '✏️', 'Math+Words', 'Soon!', 'Read!', 'Numbers!', 'Brain power!'];
 
-    const showComingSoonToast = (message) => {
-        setToastMessage(message);
-        setTimeout(() => setToastMessage(null), 2500);
+export default function LandingPage({ onSelectGame }) {
+    const [particles, setParticles] = useState([]);
+
+    const handleShoot = (e, texts, color) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        
+        // Spawn 2-4 fun particles per click!
+        const count = Math.floor(Math.random() * 3) + 2;
+        const newParticles = [];
+        
+        for (let i = 0; i < count; i++) {
+            const id = Date.now() + Math.random();
+            const text = texts[Math.floor(Math.random() * texts.length)];
+            
+            // Start roughly around where the user clicked, or center of card
+            const startX = e.clientX || rect.left + rect.width / 2;
+            const startY = e.clientY || rect.top + rect.height / 2;
+            
+            // Random trajectory 
+            const dx = (Math.random() - 0.5) * 150; // -75px to +75px horizontal drift
+            const dy = - (Math.random() * 100 + 80); // shoot strictly upwards
+            const rot = (Math.random() - 0.5) * 60; // tilt slightly
+            
+            newParticles.push({ id, text, x: startX, y: startY, dx, dy, rot, color });
+            
+            // Clean up particle after animation finishes
+            setTimeout(() => {
+                setParticles(prev => prev.filter(p => p.id !== id));
+            }, 800); 
+        }
+        
+        setParticles(prev => [...prev, ...newParticles]);
     };
 
     return (
@@ -17,6 +46,38 @@ export default function LandingPage({ onSelectGame }) {
             display: 'flex',
             flexDirection: 'column'
         }}>
+            {/* Embedded styles for the shoot animation */}
+            <style>
+            {`
+                @keyframes floatTextOut {
+                    0% { transform: translate(-50%, -50%) scale(0.5) rotate(0deg); opacity: 1; }
+                    100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.5) rotate(var(--rot)); opacity: 0; }
+                }
+            `}
+            </style>
+
+            {/* Fun Particle Shooter Overlay */}
+            {particles.map(p => (
+                <div key={p.id} style={{
+                    position: 'fixed',
+                    left: p.x,
+                    top: p.y,
+                    color: p.color,
+                    fontWeight: 900,
+                    fontSize: '1.8rem',
+                    pointerEvents: 'none', // let clicks pass through
+                    zIndex: 9999,
+                    textShadow: '0 2px 10px rgba(0,0,0,0.15)',
+                    animation: 'floatTextOut 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+                    // Pass dynamic endpoints to the keyframe via CSS vars
+                    '--dx': `${p.dx}px`,
+                    '--dy': `${p.dy}px`,
+                    '--rot': `${p.rot}deg`
+                }}>
+                    {p.text}
+                </div>
+            ))}
+
             <div style={{
                 width: '100%',
                 minHeight: '100%',
@@ -27,25 +88,6 @@ export default function LandingPage({ onSelectGame }) {
                 padding: 'clamp(40px, 8vh, 80px) 20px',
                 margin: '0 auto'
             }}>
-                {/* Custom Toast Message Overlay */}
-                <div style={{
-                    position: 'fixed',
-                    top: toastMessage ? '30px' : '-100px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    background: 'var(--blue)',
-                    color: 'white',
-                    padding: '12px 24px',
-                    borderRadius: '24px',
-                    fontWeight: 'bold',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
-                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                    zIndex: 1000,
-                    opacity: toastMessage ? 1 : 0
-                }}>
-                    {toastMessage}
-                </div>
-
                 <header className="animate-pop-in" style={{ textAlign: 'center', marginBottom: 'clamp(32px, 6vh, 64px)', width: '100%' }}>
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
                         <div style={{ 
@@ -114,7 +156,7 @@ export default function LandingPage({ onSelectGame }) {
                     {/* Coming Soon Card 1 */}
                     <div
                         className="card landing-card-locked animate-slide-up"
-                        onClick={() => showComingSoonToast("Spell Weaver is brewing! Stay tuned! ✨🔮")}
+                        onClick={(e) => handleShoot(e, spellWeaverTexts, '#9c27b0')}
                         style={{ 
                             animationDelay: '0.2s', 
                             animationFillMode: 'both', 
@@ -125,7 +167,8 @@ export default function LandingPage({ onSelectGame }) {
                             textAlign: 'center',
                             cursor: 'pointer',
                             transition: 'transform 0.1s, box-shadow 0.1s',
-                            boxShadow: 'var(--card-shadow)'
+                            boxShadow: 'var(--card-shadow)',
+                            userSelect: 'none' // Prevent text selection on rapid clicking
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
                         onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
@@ -147,7 +190,7 @@ export default function LandingPage({ onSelectGame }) {
                     {/* Coming Soon Card 2 */}
                     <div
                         className="card landing-card-locked animate-slide-up"
-                        onClick={() => showComingSoonToast("Word Problems are on the way! Start practicing! 📚✏️")}
+                        onClick={(e) => handleShoot(e, wordProblemsTexts, '#ff9800')}
                         style={{ 
                             animationDelay: '0.3s', 
                             animationFillMode: 'both', 
@@ -158,7 +201,8 @@ export default function LandingPage({ onSelectGame }) {
                             textAlign: 'center',
                             cursor: 'pointer',
                             transition: 'transform 0.1s, box-shadow 0.1s',
-                            boxShadow: 'var(--card-shadow)'
+                            boxShadow: 'var(--card-shadow)',
+                            userSelect: 'none' // Prevent text selection on rapid clicking
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
                         onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
