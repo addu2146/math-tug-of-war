@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export default function LandingPage({ onSelectGame }) {
+    const [toastMessage, setToastMessage] = useState(null);
+
+    const showComingSoonToast = (message) => {
+        setToastMessage(message);
+        setTimeout(() => setToastMessage(null), 2500);
+    };
+
     return (
         <div style={{
             width: '100%',
@@ -20,6 +27,25 @@ export default function LandingPage({ onSelectGame }) {
                 padding: 'clamp(40px, 8vh, 80px) 20px',
                 margin: '0 auto'
             }}>
+                {/* Custom Toast Message Overlay */}
+                <div style={{
+                    position: 'fixed',
+                    top: toastMessage ? '30px' : '-100px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: 'var(--blue)',
+                    color: 'white',
+                    padding: '12px 24px',
+                    borderRadius: '24px',
+                    fontWeight: 'bold',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                    zIndex: 1000,
+                    opacity: toastMessage ? 1 : 0
+                }}>
+                    {toastMessage}
+                </div>
+
                 <header className="animate-pop-in" style={{ textAlign: 'center', marginBottom: 'clamp(32px, 6vh, 64px)', width: '100%' }}>
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
                         <div style={{ 
@@ -88,36 +114,68 @@ export default function LandingPage({ onSelectGame }) {
                     {/* Coming Soon Card 1 */}
                     <div
                         className="card landing-card-locked animate-slide-up"
-                        style={{ animationDelay: '0.2s', animationFillMode: 'both', padding: 'clamp(24px, 5vw, 40px) 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
+                        onClick={() => showComingSoonToast("Spell Weaver is brewing! Stay tuned! ✨🔮")}
+                        style={{ 
+                            animationDelay: '0.2s', 
+                            animationFillMode: 'both', 
+                            padding: 'clamp(24px, 5vw, 40px) 24px', 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            alignItems: 'center', 
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            transition: 'transform 0.1s, box-shadow 0.1s',
+                            boxShadow: 'var(--card-shadow)'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                        onPointerDown={(e) => e.currentTarget.style.transform = 'scale(0.96)'}
+                        onPointerUp={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
                     >
-                        <div style={{ width: 'clamp(72px, 8vw, 96px)', height: 'clamp(72px, 8vw, 96px)', borderRadius: '24px', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: 'var(--text-light)' }}>
+                        <div style={{ width: 'clamp(72px, 8vw, 96px)', height: 'clamp(72px, 8vw, 96px)', borderRadius: '24px', background: 'rgba(156, 39, 176, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#9c27b0' }}>
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Coming Soon">
                                 <path d="M2 12h10"/><path d="M9 4v16"/><path d="m3 9 3 3-3 3"/><path d="M14 6h8"/><path d="M14 10h8"/><path d="M14 14h8"/><path d="M14 18h8"/>
                             </svg>
                         </div>
-                        <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.75rem)', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px', opacity: 0.6 }}>Spell Weaver</h2>
-                        <p style={{ fontSize: 'clamp(0.95rem, 1.5vw, 1.05rem)', color: 'var(--text-light)', lineHeight: 1.5, flex: 1, opacity: 0.8 }}>
+                        <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.75rem)', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px' }}>Spell Weaver</h2>
+                        <p style={{ fontSize: 'clamp(0.95rem, 1.5vw, 1.05rem)', color: 'var(--text-light)', lineHeight: 1.5, flex: 1 }}>
                             Test your vocabulary reflexes! Form words to build powerful defensive structures.
                         </p>
-                        <div style={{ background: '#e0e0e0', color: 'var(--text-light)', padding: '10px 20px', borderRadius: '12px', fontWeight: 800, width: '100%' }}>Coming Soon ⏳</div>
+                        <div style={{ background: 'rgba(156, 39, 176, 0.15)', color: '#9c27b0', padding: '10px 20px', borderRadius: '12px', fontWeight: 800, width: '100%' }}>Coming Soon ⏳</div>
                     </div>
 
                     {/* Coming Soon Card 2 */}
                     <div
                         className="card landing-card-locked animate-slide-up"
-                        style={{ animationDelay: '0.3s', animationFillMode: 'both', padding: 'clamp(24px, 5vw, 40px) 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
+                        onClick={() => showComingSoonToast("Word Problems are on the way! Start practicing! 📚✏️")}
+                        style={{ 
+                            animationDelay: '0.3s', 
+                            animationFillMode: 'both', 
+                            padding: 'clamp(24px, 5vw, 40px) 24px', 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            alignItems: 'center', 
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            transition: 'transform 0.1s, box-shadow 0.1s',
+                            boxShadow: 'var(--card-shadow)'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                        onPointerDown={(e) => e.currentTarget.style.transform = 'scale(0.96)'}
+                        onPointerUp={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
                     >
-                        <div style={{ width: 'clamp(72px, 8vw, 96px)', height: 'clamp(72px, 8vw, 96px)', borderRadius: '24px', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: 'var(--text-light)' }}>
+                        <div style={{ width: 'clamp(72px, 8vw, 96px)', height: 'clamp(72px, 8vw, 96px)', borderRadius: '24px', background: 'rgba(255, 152, 0, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#ff9800' }}>
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Word Problems">
                                 <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
                                 <path d="M8 7h6M8 11h8M8 15h6"/>
                             </svg>
                         </div>
-                        <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.75rem)', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px', opacity: 0.6 }}>Word Problems</h2>
-                        <p style={{ fontSize: 'clamp(0.95rem, 1.5vw, 1.05rem)', color: 'var(--text-light)', lineHeight: 1.5, flex: 1, opacity: 0.8 }}>
+                        <h2 style={{ fontSize: 'clamp(1.4rem, 3vw, 1.75rem)', fontWeight: 900, color: 'var(--text-dark)', marginBottom: '12px' }}>Word Problems</h2>
+                        <p style={{ fontSize: 'clamp(0.95rem, 1.5vw, 1.05rem)', color: 'var(--text-light)', lineHeight: 1.5, flex: 1 }}>
                             Simple word problems to make learning more educational and help improve students' problem-solving skills.
                         </p>
-                        <div style={{ background: '#e0e0e0', color: 'var(--text-light)', padding: '10px 20px', borderRadius: '12px', fontWeight: 800, width: '100%' }}>Coming Soon ⏳</div>
+                        <div style={{ background: 'rgba(255, 152, 0, 0.15)', color: '#ff9800', padding: '10px 20px', borderRadius: '12px', fontWeight: 800, width: '100%' }}>Coming Soon ⏳</div>
                     </div>
                 </div>
 
